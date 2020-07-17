@@ -1,1 +1,1 @@
-worker: jungsanbot.py
+worker: python jungsanbot.py
