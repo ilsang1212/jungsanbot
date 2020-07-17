@@ -26,6 +26,7 @@ from io import StringIO
 import aiohttp
 from pymongo import MongoClient
 import pymongo, ssl, traceback
+from github import Github
 
 log_stream = StringIO()    
 logging.basicConfig(stream=log_stream, level=logging.WARNING)
