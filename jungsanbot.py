@@ -82,10 +82,10 @@ def init():
 	basicSetting.append(mongoDB_HOST)
 	basicSetting.append(user_ID)
 	basicSetting.append(user_PASSWORD)
-	basicSetting.append(inputData[1][(inputData[1].find("="))+2:].rstrip('\n'))
-	basicSetting.append(inputData[2][(inputData[2].find("="))+2:].rstrip('\n'))
-	basicSetting.append(inputData[3][(inputData[3].find("="))+2:].rstrip('\n'))
-	basicSetting.append(inputData[0][(inputData[0].find("="))+2:].rstrip('\n'))
+	basicSetting.append(inputData[1][(inputData[1].find("="))+2:].rstrip('\r'))
+	basicSetting.append(inputData[2][(inputData[2].find("="))+2:].rstrip('\r'))
+	basicSetting.append(inputData[3][(inputData[3].find("="))+2:].rstrip('\r'))
+	basicSetting.append(inputData[0][(inputData[0].find("="))+2:].rstrip('\r'))
 
 	# basicSetting[0] = bot_token
 	# basicSetting[1] = host
