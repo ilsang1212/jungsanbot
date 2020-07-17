@@ -98,7 +98,7 @@ def init():
 
 	############## 보탐봇 명령어 리스트 #####################
 	for i in range(len(commandData)):
-		tmp_command = commandData[i][(commandData[0].find("="))+2:].rstrip('\n')
+		tmp_command = commandData[i][(commandData[0].find("="))+2:].rstrip('\r')
 		fc = tmp_command.split(', ')
 		commandSetting.append(fc)
 		fc = []
