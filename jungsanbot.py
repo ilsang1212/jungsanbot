@@ -27,6 +27,7 @@ import aiohttp
 from pymongo import MongoClient
 import pymongo, ssl, traceback
 from github import Github
+import base64
 
 log_stream = StringIO()    
 logging.basicConfig(stream=log_stream, level=logging.WARNING)
