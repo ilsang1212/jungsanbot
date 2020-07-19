@@ -242,7 +242,7 @@ class IlsangDistributionBot(commands.AutoShardedBot):
 
 			for jungsan_data in jungsan_document:
 				cnt += 1
-				total_save_money += jungsan_data['price']
+				total_save_money += int(jungsan_data['price']*(1-(basicSetting[7]/100)))a
 				delete_jungsan_id.append(jungsan_data['_id'])
 				del jungsan_data['_id']
 				backup_jungsan_document.append(jungsan_data)
@@ -256,6 +256,15 @@ class IlsangDistributionBot(commands.AutoShardedBot):
 
 				result_guild_update : dict = self.db.jungsan.guild.update_one({"_id":"guild"}, {"$inc":{"guild_money":total_save_money}}, upsert = True)
 				total_guild_money : dict = self.db.jungsan.guild.find_one({"_id":"guild"})
+
+				insert_log_data = {
+							"in_out_check":True, # True : 입금, False : 출금
+							"log_date":datetime.datetime.now(),
+							"money":str(total_save_money),
+							"member_list":[],
+							"reason":"정산 자동 삭제 후 적립"
+				}
+				result_guild_log = self.guild_db_log.insert_one(insert_log_data)
 
 				embed = discord.Embed(
 						title = f"💰  혈비 자동 적립 ({(datetime.datetime.now() + datetime.timedelta(hours = int(basicSetting[8]))).strftime('%Y-%m-%d %H:%M:%S')})",
