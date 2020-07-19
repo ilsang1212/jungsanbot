@@ -42,13 +42,21 @@ logging.basicConfig(stream=log_stream, level=logging.WARNING)
 #ilsanglog.addHandler(handler)
 #####################################################
 
-access_token = os.environ["BOT_TOKEN"]
-git_access_token = os.environ["GIT_TOKEN"]
-git_access_repo = os.environ["GIT_REPO"]	
-mongoDB_HOST = os.environ["MONGODB_HOST"]
-user_ID = os.environ["USER_ID"]
-user_PASSWORD = os.environ["USER_PW"]
-time_Zone = os.environ["TIME_ZONE"]
+access_token = "NzA0NTE1NDEyMTU4NTc4NzA4.XqeRKQ.-0_IhhoZDk-JALasIZOUBjiUaaY"
+git_access_token = "80983618a947105434f1ed67c914a992a45c4645"
+git_access_repo = "ilsang1212/jungsanbot"
+mongoDB_HOST = "cluster0-shard-00-00.27se1.mongodb.net:27017, cluster0-shard-00-01.27se1.mongodb.net:27017, cluster0-shard-00-02.27se1.mongodb.net:27017"
+user_ID = "ilsang"
+user_PASSWORD = "236541-ac"
+time_Zone = 9
+
+# access_token = os.environ["BOT_TOKEN"]
+# git_access_token = os.environ["GIT_TOKEN"]
+# git_access_repo = os.environ["GIT_REPO"]	
+# mongoDB_HOST = os.environ["MONGODB_HOST"]
+# user_ID = os.environ["USER_ID"]
+# user_PASSWORD = os.environ["USER_PW"]
+# time_Zone = os.environ["TIME_ZONE"]
 
 g = Github(git_access_token)
 repo = g.get_repo(git_access_repo)
@@ -584,7 +592,7 @@ class adminCog(commands.Cog):
 			embed.add_field(name = f"🤴 [ 총무 전용 명령어 ]", value = f"```css\n{manager_command_list}```", inline = False)
 			embed.add_field(name = f"🧑 [ 일반 명령어 ]", value = f"```css\n{member_command_list}```", inline = False)
 			embed.add_field(name = f"🔧 [ 기타 명령어 ]", value = f"```css\n{etc_command_list}```", inline = False)
-			embed.set_footer(text = f"※ '미입력' 상태의 등록건만 수정 가능\n    '분배중' 상태의 등록건만 정산 가능\n    거래소세금 : 미입력시 5%")
+			embed.set_footer(text = f"※ '미입력' 상태의 등록건만 수정 가능\n    '분배중' 상태의 등록건만 정산 가능\n    거래소세금 : 미입력시 {basicSetting[7]}%")
 			return await ctx.send( embed=embed, tts=False)
 
 	################ member_db초기화 ################ .
@@ -3033,6 +3041,21 @@ class bankCog(commands.Cog):
 		except ValueError:
 			return await ctx.send(f"**[금액]**은 숫자로 입력 해주세요")
 
+		check_member_data : list = []
+		check_member_list : list = []
+		wrong_input_id : list = []
+
+		check_member_data = list(self.member_db.find())
+		for game_id in check_member_data:
+			check_member_list.append(game_id['game_ID'])
+
+		for game_id in input_bank_deposit_data[1:]:
+			if game_id not in check_member_list:
+				wrong_input_id.append(game_id)
+
+		if len(wrong_input_id) > 0:
+			return await ctx.send(f"```입금자 [{', '.join(wrong_input_id)}](은)는 혈원으로 등록되지 않은 아이디 입니다.```")	
+
 		result_update = self.member_db.update_many({"game_ID":{"$in":input_bank_deposit_data[1:]}}, {"$inc":{"account":input_bank_deposit_data[0]}})
 		if result_update.modified_count != len(input_bank_deposit_data[1:]):
 			return await ctx.send(f"```은행 입금 실패. 정확한 [아이디]를 입력 후 다시 시도 해보세요!```")
@@ -3065,6 +3088,21 @@ class bankCog(commands.Cog):
 		except ValueError:
 			return await ctx.send(f"**[금액]**은 숫자로 입력 해주세요")
 
+		check_member_data : list = []
+		check_member_list : list = []
+		wrong_input_id : list = []
+
+		check_member_data = list(self.member_db.find())
+		for game_id in check_member_data:
+			check_member_list.append(game_id['game_ID'])
+
+		for game_id in input_bank_withdraw_data[1:]:
+			if game_id not in check_member_list:
+				wrong_input_id.append(game_id)
+
+		if len(wrong_input_id) > 0:
+			return await ctx.send(f"```출금자 [{', '.join(wrong_input_id)}](은)는 혈원으로 등록되지 않은 아이디 입니다.```")	
+
 		result_update = self.member_db.update_many({"game_ID":{"$in":input_bank_withdraw_data[1:]}}, {"$inc":{"account":-input_bank_withdraw_data[0]}})
 
 		if result_update.modified_count != len(input_bank_withdraw_data[1:]):
@@ -3091,6 +3129,21 @@ class bankCog(commands.Cog):
 			args = int(args)
 		except ValueError:
 			return await ctx.send(f"**[금액]**은 숫자로 입력 해주세요")
+
+		check_member_data : list = []
+		check_member_list : list = []
+		wrong_input_id : list = []
+
+		check_member_data = list(self.member_db.find())
+		for game_id in check_member_data:
+			check_member_list.append(game_id['game_ID'])
+
+		for game_id in input_guild_support_money_ID_data[1:]:
+			if game_id not in check_member_list:
+				wrong_input_id.append(game_id)
+
+		if len(wrong_input_id) > 0:
+			return await ctx.send(f"```지원자 [{', '.join(wrong_input_id)}](은)는 혈원으로 등록되지 않은 아이디 입니다.```")	
 
 		result_guild_update : dict = self.guild_db.update_one({"_id":"guild"}, {"$inc":{"guild_money":args}}, upsert = True)
 		if result_guild_update.raw_result["nModified"] < 1 and "upserted" not in result_guild_update.raw_result:
