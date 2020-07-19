@@ -42,21 +42,13 @@ logging.basicConfig(stream=log_stream, level=logging.WARNING)
 #ilsanglog.addHandler(handler)
 #####################################################
 
-access_token = "NzA0NTE1NDEyMTU4NTc4NzA4.XqeRKQ.-0_IhhoZDk-JALasIZOUBjiUaaY"
-git_access_token = "80983618a947105434f1ed67c914a992a45c4645"
-git_access_repo = "ilsang1212/jungsanbot"
-mongoDB_HOST = "cluster0-shard-00-00.27se1.mongodb.net:27017, cluster0-shard-00-01.27se1.mongodb.net:27017, cluster0-shard-00-02.27se1.mongodb.net:27017"
-user_ID = "ilsang"
-user_PASSWORD = "236541-ac"
-time_Zone = 9
-
-# access_token = os.environ["BOT_TOKEN"]
-# git_access_token = os.environ["GIT_TOKEN"]
-# git_access_repo = os.environ["GIT_REPO"]	
-# mongoDB_HOST = os.environ["MONGODB_HOST"]
-# user_ID = os.environ["USER_ID"]
-# user_PASSWORD = os.environ["USER_PW"]
-# time_Zone = os.environ["TIME_ZONE"]
+access_token = os.environ["BOT_TOKEN"]
+git_access_token = os.environ["GIT_TOKEN"]
+git_access_repo = os.environ["GIT_REPO"]	
+mongoDB_HOST = os.environ["MONGODB_HOST"]
+user_ID = os.environ["USER_ID"]
+user_PASSWORD = os.environ["USER_PW"]
+time_Zone = os.environ["TIME_ZONE"]
 
 g = Github(git_access_token)
 repo = g.get_repo(git_access_repo)
