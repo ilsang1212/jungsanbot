@@ -137,6 +137,7 @@ def get_detail_embed(info : dict = {}):
 	# "modifydate" : datetime = 수정날짜
 	# "gulid_money_insert" : bool = 혈비등록여부
 	# "bank_money_insert" : bool = 은행입금여부
+	# "image_url":""
 
 	embed = discord.Embed(
 			title = "📜 등록 정보",
@@ -145,14 +146,16 @@ def get_detail_embed(info : dict = {}):
 			)
 	embed.add_field(name = "[ 순번 ]", value = f"```{info['_id']}```")
 	embed.add_field(name = "[ 등록 ]", value = f"```{info['regist']}```")
-	embed.add_field(name = "[ 일시 ]", value = f"```{info['getdate'].strftime('%Y-%m-%d %H:%M:%S')}```", inline = False)
+	embed.add_field(name = "[ 일시 ]", value = f"```{info['getdate'].strftime('%y-%m-%d %H:%M:%S')}```", inline = False)
 	embed.add_field(name = "[ 보스 ]", value = f"```{info['boss']}```")
 	embed.add_field(name = "[ 아이템 ]", value = f"```{info['item']}```")
 	embed.add_field(name = "[ 루팅 ]", value = f"```{info['toggle']}```")
 	embed.add_field(name = "[ 상태 ]", value = f"```{info['itemstatus']}```")
 	embed.add_field(name = "[ 판매금 ]", value = f"```{info['price']}```")
 	embed.add_field(name = "[ 참여자 ]", value = f"```{', '.join(info['before_jungsan_ID']+info['after_jungsan_ID'])}```")
-
+	if 'image_url' in info.keys():
+		if info['image_url'] is not None:
+			embed.set_image(url = info['image_url'])
 	return embed
 
 class IlsangDistributionBot(commands.AutoShardedBot):
@@ -260,7 +263,7 @@ class IlsangDistributionBot(commands.AutoShardedBot):
 				result_guild_log = self.db.jungsan.guild_log.insert_one(insert_log_data)
 
 				embed = discord.Embed(
-						title = f"💰  혈비 자동 적립 ({(datetime.datetime.now() + datetime.timedelta(hours = int(basicSetting[8]))).strftime('%Y-%m-%d %H:%M:%S')})",
+						title = f"💰  혈비 자동 적립 ({(datetime.datetime.now() + datetime.timedelta(hours = int(basicSetting[8]))).strftime('%y-%m-%d %H:%M:%S')})",
 						description = f"",
 						color=0x00ff00
 						)
@@ -280,7 +283,7 @@ class IlsangDistributionBot(commands.AutoShardedBot):
 		channel_name, channel_id = get_guild_channel_info(self)
 
 		if str(basicSetting[6]) in channel_id:
-			print(f"< 접속시간 [{(datetime.datetime.now() + datetime.timedelta(hours = int(basicSetting[8]))).strftime('%Y-%m-%d %H:%M:%S')}] >")
+			print(f"< 접속시간 [{(datetime.datetime.now() + datetime.timedelta(hours = int(basicSetting[8]))).strftime('%y-%m-%d %H:%M:%S')}] >")
 			print(f"< 텍스트채널 [{self.get_channel(int(basicSetting[6])).name}] 접속완료 >")
 		else:
 			basicSetting[6] = 0
@@ -552,7 +555,7 @@ class adminCog(commands.Cog):
 			member_command_list += f"{','.join(commandSetting[44])}\n"   # 창고
 			member_command_list += f"{','.join(commandSetting[11])}\n\n"   # 정산확인
 			
-			member_command_list += f"{','.join(commandSetting[12])} [보스명] [아이템] [루팅자] [아이디1] [아이디2] ...\n\n"   # 등록
+			member_command_list += f"{','.join(commandSetting[12])} [보스명] [아이템] [루팅자] [아이디1] [아이디2] ... (참고이미지 url)\n\n"   # 등록
 			member_command_list += f"----- 등록자만 가능 -----\n"   # 등록자
 			member_command_list += f"{','.join(commandSetting[13])} (상세)\n"   # 등록확인1
 			member_command_list += f"{','.join(commandSetting[13])} (상세) (검색조건) (검색값)\n"   # 등록확인2
@@ -568,7 +571,8 @@ class adminCog(commands.Cog):
 			member_command_list += f"{','.join(commandSetting[20])} [순번] [변경아이템명]\n"   # 템수정
 			member_command_list += f"{','.join(commandSetting[21])} [순번] [변경아이디]\n"   # 템수정
 			member_command_list += f"{','.join(commandSetting[22])} [순번] [추가아이디]\n"   # 참여자추가
-			member_command_list += f"{','.join(commandSetting[23])} [순번] [삭제아이디]\n"   # 참여자추가
+			member_command_list += f"{','.join(commandSetting[23])} [순번] [삭제아이디]\n"   # 참여자삭제
+			member_command_list += f"{','.join(commandSetting[50])} [순번] [수정이미지 url]\n"   # 이미지수정
 			member_command_list += f"{','.join(commandSetting[24])} [순번] [금액]\n"   # 판매
 			member_command_list += f"{','.join(commandSetting[45])} [순번] [금액] [인원]\n"   # 뽑기판매
 			member_command_list += f"{','.join(commandSetting[29])} [순번] [금액]\n"   # 저축
@@ -764,7 +768,7 @@ class adminCog(commands.Cog):
 		result : list = list(self.guild_db_log.find({}))
 
 		log_date_list : list = []
-		log_date_list = sorted(list(set([result_data['log_date'].strftime('%Y-%m-%d') for result_data in result])))
+		log_date_list = sorted(list(set([result_data['log_date'].strftime('%y-%m-%d') for result_data in result])))
 		
 		total_distribute_money : int = 0
 		embed_list : list = []
@@ -792,7 +796,7 @@ class adminCog(commands.Cog):
 						color=0x00ff00
 						)
 					embed_list.append(tmp_embed)
-				if result_data['log_date'].strftime('%Y-%m-%d') == date:
+				if result_data['log_date'].strftime('%y-%m-%d') == date:
 					if result_data['in_out_check']:
 						if result_data['reason'] != "":
 							detail_info += f"+ 💰 {result_data['money']} : {', '.join(result_data['member_list'])} (사유:{result_data['reason']})\n"
@@ -1131,6 +1135,8 @@ class manageCog(commands.Cog):
 					except:
 						return await ctx.send(f"**[순번] [검색값]**은 \"숫자\"로 입력 해주세요!")
 					jungsan_document : dict = self.jungsan_db.find_one({"$and" : [{"before_jungsan_ID" : member_data['game_ID']}, {"_id":input_distribute_all_finish[1]}, {"$or" : [{"itemstatus" : "분배중"}, {"itemstatus" : "미판매"}]}]})
+					if not jungsan_document:
+						return await ctx.send(f"{ctx.author.mention}님! 수령할 정산 내역이 없습니다.")
 					embed = get_detail_embed(jungsan_document)
 					return await ctx.send(embed = embed)
 				elif input_distribute_all_finish[0] == "보스명":
@@ -1161,6 +1167,9 @@ class manageCog(commands.Cog):
 		toggle_list : list = []
 		toggle_list = sorted(list(set([jungsan_data['toggle'] for jungsan_data in jungsan_document])))
 
+		if "혈비" in toggle_list:
+			toggle_list.remove("혈비")
+
 		embed = discord.Embed(
 				title = f"📜 [{member_data['game_ID']}]님 정산 내역",
 				description = "",
@@ -1174,14 +1183,17 @@ class manageCog(commands.Cog):
 			tmp_info.append("")
 			for jungsan_data in jungsan_document:
 				if jungsan_data['toggle'] == game_id:
+					if len(tmp_info[info_cnt]) > 900:
+						tmp_info.append("")
+						info_cnt += 1
 					if jungsan_data['itemstatus'] == "미판매":
-						if len(tmp_info[info_cnt]) > 900:
-							tmp_info.append("")
-							info_cnt += 1
-						tmp_info[info_cnt] += f"-[순번:{jungsan_data['_id']}]|{jungsan_data['getdate'].strftime('%Y-%m-%d')}|{jungsan_data['boss']}|{jungsan_data['item']}|{jungsan_data['itemstatus']}\n"
+						tmp_info[info_cnt] += f"-[순번:{jungsan_data['_id']}]|{jungsan_data['getdate'].strftime('%y-%m-%d')}|{jungsan_data['boss']}|{jungsan_data['item']}|{jungsan_data['itemstatus']}\n"
 					else:
 						each_price += jungsan_data['each_price']
-						tmp_info[info_cnt] += f"+[순번:{jungsan_data['_id']}]|{jungsan_data['getdate'].strftime('%Y-%m-%d')}|{jungsan_data['boss']}|{jungsan_data['item']}|💰{jungsan_data['each_price']}\n"
+						if jungsan_data["ladder_check"]:
+							tmp_info[info_cnt] += f"+[순번:{jungsan_data['_id']}]|{jungsan_data['getdate'].strftime('%y-%m-%d')}|{jungsan_data['boss']}|{jungsan_data['item']}|🌟|💰{jungsan_data['each_price']}\n"
+						else:
+							tmp_info[info_cnt] += f"+[순번:{jungsan_data['_id']}]|{jungsan_data['getdate'].strftime('%y-%m-%d')}|{jungsan_data['boss']}|{jungsan_data['item']}|💰{jungsan_data['each_price']}\n"
 			total_money += each_price
 			if len(tmp_info) > 1:
 				embed.add_field(
@@ -1227,8 +1239,18 @@ class manageCog(commands.Cog):
 
 		if not args:
 			return await ctx.send(f"**{commandSetting[12][0]} [보스명] [아이템명] [루팅자] [참여자1] [참여자2]...** 양식으로 등록 해주세요")
+
+		tmp_args : str = ""
+		tmp_image_url : str = ""
+
+		if args.find("https://") != -1:
+			tmp_data = args.split("https://")
+			tmp_args = tmp_data[0]
+			tmp_image_url = f"https://{tmp_data[1]}"
+		else:
+			tmp_args = args
 		
-		input_regist_data : list = args.split()
+		input_regist_data : list = tmp_args.split()
 		len_input_regist_data = len(input_regist_data)
 
 		if len_input_regist_data < 4:
@@ -1277,7 +1299,8 @@ class manageCog(commands.Cog):
 					"modifydate":input_time,
 					"gulid_money_insert":gulid_money_insert_check,
 					"bank_money_insert":False,
-					"ladder_check":False
+					"ladder_check":False,
+					"image_url":tmp_image_url
 					}
 		
 		# "_id" : int = 순번
@@ -1296,13 +1319,14 @@ class manageCog(commands.Cog):
 		# "modifydate" : datetime = 수정날짜
 		# "gulid_money_insert" : bool = 혈비등록여부
 		# "bank_money_insert" : bool = 은행입금여부
+		# "image_url":이미지 url
 
 		embed = discord.Embed(
 				title = "📜 등록 정보",
 				description = "",
 				color=0x00ff00
 				)
-		embed.add_field(name = "[ 일시 ]", value = f"```{insert_data['getdate'].strftime('%Y-%m-%d %H:%M:%S')}```", inline = False)
+		embed.add_field(name = "[ 일시 ]", value = f"```{insert_data['getdate'].strftime('%y-%m-%d %H:%M:%S')}```", inline = False)
 		embed.add_field(name = "[ 보스 ]", value = f"```{insert_data['boss']}```")
 		embed.add_field(name = "[ 아이템 ]", value = f"```{insert_data['item']}```")
 		embed.add_field(name = "[ 루팅 ]", value = f"```{insert_data['toggle']}```")
@@ -1372,6 +1396,8 @@ class manageCog(commands.Cog):
 					except:
 						return await ctx.send(f"**[순번] [검색값]**은 \"숫자\"로 입력 해주세요!")
 					jungsan_document : dict = self.jungsan_db.find_one({"_id":input_distribute_all_finish[1]})
+					if not jungsan_document:
+						return await ctx.send(f"{ctx.author.mention}님! 등록된 정산 목록이 없습니다.")
 					embed = get_detail_embed(jungsan_document)
 					return await ctx.send(embed = embed)
 				elif input_distribute_all_finish[0] == "보스명":
@@ -1429,34 +1455,41 @@ class manageCog(commands.Cog):
 
 			if jungsan_data['gulid_money_insert']:
 				if jungsan_data['itemstatus'] == "미판매":
-					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 혈비적립예정\n[ 등록자 : {jungsan_data['regist']} ]"
+					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 혈비적립예정\n[ 등록자 : {jungsan_data['regist']} ]"
 					detail_info = f"```fix\n[ 혈비적립 ]```"
 				else:
-					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 혈비적립완료\n[ 등록자 : {jungsan_data['regist']} ]"
+					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 혈비적립완료\n[ 등록자 : {jungsan_data['regist']} ]"
 					detail_info = f"~~```fix\n[ 혈비적립 ]```~~"
 			elif jungsan_data['bank_money_insert']:
-				detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 은행저축완료\n[ 등록자 : {jungsan_data['regist']} ]"
+				detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 은행저축완료\n[ 등록자 : {jungsan_data['regist']} ]"
 				detail_info = f"~~```fix\n[ 은행저축 ]```~~"
 			else:
 				if jungsan_data['itemstatus'] == "분배중":
-					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']} : 1인당 💰{jungsan_data['each_price']}\n[ 등록자 : {jungsan_data['regist']} ]"
+					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']} : 1인당 💰{jungsan_data['each_price']}\n[ 등록자 : {jungsan_data['regist']} ]"
 					if visual_flag == 0:
 						detail_info = f"```fix\n[ 분배중 ] : {len(jungsan_data['before_jungsan_ID'])}명   [ 분배완료 ] : {len(jungsan_data['after_jungsan_ID'])}명```"
 					else:
 						detail_info = f"```diff\n+ 분 배 중 : {len(jungsan_data['before_jungsan_ID'])}명 (💰{len(jungsan_data['before_jungsan_ID'])*jungsan_data['each_price']})\n{', '.join(jungsan_data['before_jungsan_ID'])}\n- 분배완료 : {len(jungsan_data['after_jungsan_ID'])}명  (💰{len(jungsan_data['after_jungsan_ID'])*jungsan_data['each_price']})\n{', '.join(jungsan_data['after_jungsan_ID'])}```"
 					total_distribute_money += len(jungsan_data['before_jungsan_ID'])*int(jungsan_data['each_price'])
 				elif jungsan_data['itemstatus'] == "미판매":
-					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']}\n[ 등록자 : {jungsan_data['regist']} ]"
+					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']}\n[ 등록자 : {jungsan_data['regist']} ]"
 					if visual_flag == 0:
 						detail_info = f"```ini\n[ 참여자 ] : {len(jungsan_data['before_jungsan_ID'])}명```"
 					else:
 						detail_info = f"```ini\n[ 참여자 ] : {len(jungsan_data['before_jungsan_ID'])}명\n{', '.join(jungsan_data['before_jungsan_ID'])}```"
 				else:
-					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']} | 💰~~{jungsan_data['price']}~~\n[ 등록자 : {jungsan_data['regist']} ]"
+					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']} | 💰~~{jungsan_data['price']}~~\n[ 등록자 : {jungsan_data['regist']} ]"
 					if visual_flag == 0:
 						detail_info = f"~~```yaml\n[ 분배완료 ] : {len(jungsan_data['after_jungsan_ID'])}명```~~"
 					else:
 						detail_info = f"~~```yaml\n[ 분배완료 ] : {len(jungsan_data['after_jungsan_ID'])}명\n{', '.join(jungsan_data['after_jungsan_ID'])}```~~"
+
+			if 'image_url' in jungsan_data.keys():
+				if jungsan_data['image_url'] is not None:
+					detail_title_info += "📸"
+			
+			if jungsan_data['ladder_check']:
+				detail_title_info += "🌟"
 
 			embed_list[embed_cnt].add_field(name = detail_title_info,
 							value = detail_info,
@@ -1512,6 +1545,8 @@ class manageCog(commands.Cog):
 					except:
 						return await ctx.send(f"**[순번] [검색값]**은 \"숫자\"로 입력 해주세요!")
 					jungsan_document : dict = self.jungsan_db.find_one({"regist_ID":str(ctx.author.id), "_id":input_distribute_all_finish[1]})
+					if not jungsan_document:
+						return await ctx.send(f"{ctx.author.mention}님! 등록된 정산 목록이 없습니다.")
 					embed = get_detail_embed(jungsan_document)
 					return await ctx.send(embed = embed)
 				elif input_distribute_all_finish[0] == "보스명":
@@ -1565,34 +1600,41 @@ class manageCog(commands.Cog):
 
 			if jungsan_data['gulid_money_insert']:
 				if jungsan_data['itemstatus'] == "미판매":
-					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 혈비적립예정"
+					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 혈비적립예정"
 					detail_info = f"```fix\n[ 혈비적립 ]```"
 				else:
-					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 혈비적립완료"
+					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 혈비적립완료"
 					detail_info = f"~~```fix\n[ 혈비적립 ]```~~"
 			elif jungsan_data['bank_money_insert']:
-				detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 은행저축완료"
+				detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 은행저축완료"
 				detail_info = f"~~```fix\n[ 은행저축 ]```~~"
 			else:
 				if jungsan_data['itemstatus'] == "분배중":
-					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']} : 1인당 💰{jungsan_data['each_price']}"
+					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']} : 1인당 💰{jungsan_data['each_price']}"
 					if visual_flag == 0:
 						detail_info = f"```fix\n[ 분배중 ] : {len(jungsan_data['before_jungsan_ID'])}명   [ 분배완료 ] : {len(jungsan_data['after_jungsan_ID'])}명```"
 					else:
 						detail_info = f"```diff\n+ 분 배 중 : {len(jungsan_data['before_jungsan_ID'])}명 (💰{len(jungsan_data['before_jungsan_ID'])*jungsan_data['each_price']})\n{', '.join(jungsan_data['before_jungsan_ID'])}\n- 분배완료 : {len(jungsan_data['after_jungsan_ID'])}명  (💰{len(jungsan_data['after_jungsan_ID'])*jungsan_data['each_price']})\n{', '.join(jungsan_data['after_jungsan_ID'])}```"
 					total_distribute_money += len(jungsan_data['before_jungsan_ID'])*int(jungsan_data['each_price'])
 				elif jungsan_data['itemstatus'] == "미판매":
-					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']}"
+					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']}"
 					if visual_flag == 0:
 						detail_info = f"```ini\n[ 참여자 ] : {len(jungsan_data['before_jungsan_ID'])}명```"
 					else:
 						detail_info = f"```ini\n[ 참여자 ] : {len(jungsan_data['before_jungsan_ID'])}명\n{', '.join(jungsan_data['before_jungsan_ID'])}```"
 				else:
-					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']} | 💰~~{jungsan_data['price']}~~"
+					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']} | 💰~~{jungsan_data['price']}~~"
 					if visual_flag == 0:
 						detail_info = f"~~```yaml\n[ 분배완료 ] : {len(jungsan_data['after_jungsan_ID'])}명```~~"
 					else:
 						detail_info = f"~~```yaml\n[ 분배완료 ] : {len(jungsan_data['after_jungsan_ID'])}명\n{', '.join(jungsan_data['after_jungsan_ID'])}```~~"
+
+			if 'image_url' in jungsan_data.keys():
+				if jungsan_data['image_url'] != "":
+					detail_title_info += " 📸"
+			
+			if jungsan_data['ladder_check']:
+				detail_title_info += " 🌟"
 
 			embed_list[embed_cnt].add_field(name = detail_title_info,
 							value = detail_info,
@@ -1685,7 +1727,7 @@ class manageCog(commands.Cog):
 				color=0x00ff00
 				)
 		embed.add_field(name = "[ 순번 ]", value = f"```{jungsan_data['_id']}```", inline = False)
-		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%Y-%m-%d %H:%M:%S')}```", inline = False)
+		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%y-%m-%d %H:%M:%S')}```", inline = False)
 		if jungsan_data['boss'] == insert_data['boss']:
 			embed.add_field(name = "[ 보스 ]", value = f"```{insert_data['boss']}```")
 		else:
@@ -1702,7 +1744,7 @@ class manageCog(commands.Cog):
 			embed.add_field(name = "[ 참여자 ]", value = f"```{', '.join(insert_data['before_jungsan_ID'])}```")
 		else:
 			embed.add_field(name = "[ 참여자 ]", value = f"```{', '.join(jungsan_data['before_jungsan_ID'])} → {', '.join(insert_data['before_jungsan_ID'])}```")
-		embed.set_footer(text = f"{insert_data['modifydate'].strftime('%Y-%m-%d %H:%M:%S')} 수정!")
+		embed.set_footer(text = f"{insert_data['modifydate'].strftime('%y-%m-%d %H:%M:%S')} 수정!")
 		await ctx.send(embed = embed)
 
 		data_regist_warning_message = await ctx.send(f"**입력하신 수정 내역을 확인해 보세요!**\n**수정 : ⭕ 취소: ❌**\n({basicSetting[5]}초 동안 입력이 없을시 수정이 취소됩니다.)", tts=False)
@@ -1755,7 +1797,7 @@ class manageCog(commands.Cog):
 					color=0x00ff00
 					)
 		embed.add_field(name = "[ 순번 ]", value = f"```{jungsan_data['_id']}```", inline = False)
-		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%Y-%m-%d %H:%M:%S')}```", inline = False)
+		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%y-%m-%d %H:%M:%S')}```", inline = False)
 		embed.add_field(name = "[ 보스 ]", value = f"```{jungsan_data['boss']}```")
 		embed.add_field(name = "[ 아이템 ]", value = f"```{jungsan_data['item']}```")
 		embed.add_field(name = "[ 루팅 ]", value = f"```{jungsan_data['toggle']}```")
@@ -1822,6 +1864,8 @@ class manageCog(commands.Cog):
 					except:
 						return await ctx.send(f"**[순번] [검색값]**은 \"숫자\"로 입력 해주세요!")
 					jungsan_document : dict = self.jungsan_db.find_one({"toggle_ID":str(ctx.author.id), "_id":input_distribute_all_finish[1]})
+					if not jungsan_document:
+						return await ctx.send(f"{ctx.author.mention}님! 등록된 정산 목록이 없습니다.")
 					embed = get_detail_embed(jungsan_document)
 					return await ctx.send(embed = embed)
 				elif input_distribute_all_finish[0] == "보스명":
@@ -1875,34 +1919,41 @@ class manageCog(commands.Cog):
 			
 			if jungsan_data['gulid_money_insert']:
 				if jungsan_data['itemstatus'] == "미판매":
-					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 혈비적립예정"
+					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 혈비적립예정"
 					detail_info = f"```fix\n[ 혈비적립 ]```"
 				else:
-					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 혈비적립완료"
+					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 혈비적립완료"
 					detail_info = f"~~```fix\n[ 혈비적립 ]```~~"
 			elif jungsan_data['bank_money_insert']:
-				detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 은행저축"
+				detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 은행저축"
 				detail_info = f"```fix\n[ 은행저축 ]```"
 			else:			
 				if jungsan_data['itemstatus'] == "분배중":
-					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']} : 1인당 💰{jungsan_data['each_price']}"
+					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']} : 1인당 💰{jungsan_data['each_price']}"
 					if visual_flag == 0:
 						detail_info = f"```fix\n[ 분배중 ] : {len(jungsan_data['before_jungsan_ID'])}명   [ 분배완료 ] : {len(jungsan_data['after_jungsan_ID'])}명```"
 					else:
 						detail_info = f"```diff\n+ 분 배 중 : {len(jungsan_data['before_jungsan_ID'])}명 (💰{len(jungsan_data['before_jungsan_ID'])*jungsan_data['each_price']})\n{', '.join(jungsan_data['before_jungsan_ID'])}\n- 분배완료 : {len(jungsan_data['after_jungsan_ID'])}명  (💰{len(jungsan_data['after_jungsan_ID'])*jungsan_data['each_price']})\n{', '.join(jungsan_data['after_jungsan_ID'])}```"
 					total_distribute_money += len(jungsan_data['before_jungsan_ID'])*int(jungsan_data['each_price'])
 				elif jungsan_data['itemstatus'] == "미판매":
-					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']}"
+					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']}"
 					if visual_flag == 0:
 						detail_info = f"```ini\n[ 참여자 ] : {len(jungsan_data['before_jungsan_ID'])}명```"
 					else:
 						detail_info = f"```ini\n[ 참여자 ] : {len(jungsan_data['before_jungsan_ID'])}명\n{', '.join(jungsan_data['before_jungsan_ID'])}```"
 				else:
-					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']} | 💰~~{jungsan_data['price']}~~"
+					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']} | 💰~~{jungsan_data['price']}~~"
 					if visual_flag == 0:
 						detail_info = f"~~```yaml\n[ 분배완료 ] : {len(jungsan_data['after_jungsan_ID'])}명```~~"
 					else:
 						detail_info = f"~~```yaml\n[ 분배완료 ] : {len(jungsan_data['after_jungsan_ID'])}명\n{', '.join(jungsan_data['after_jungsan_ID'])}```~~"
+
+			if 'image_url' in jungsan_data.keys():
+				if jungsan_data['image_url'] != "":
+					detail_title_info += " 📸"
+			
+			if jungsan_data['ladder_check']:
+				detail_title_info += " 🌟"
 
 			embed_list[embed_cnt].add_field(name = detail_title_info,
 							value = detail_info,
@@ -1995,7 +2046,7 @@ class manageCog(commands.Cog):
 				color=0x00ff00
 				)
 		embed.add_field(name = "[ 순번 ]", value = f"```{jungsan_data['_id']}```", inline = False)
-		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%Y-%m-%d %H:%M:%S')}```", inline = False)
+		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%y-%m-%d %H:%M:%S')}```", inline = False)
 		if jungsan_data['boss'] == insert_data['boss']:
 			embed.add_field(name = "[ 보스 ]", value = f"```{insert_data['boss']}```")
 		else:
@@ -2012,7 +2063,7 @@ class manageCog(commands.Cog):
 			embed.add_field(name = "[ 참여자 ]", value = f"```{', '.join(insert_data['before_jungsan_ID'])}```")
 		else:
 			embed.add_field(name = "[ 참여자 ]", value = f"```{', '.join(jungsan_data['before_jungsan_ID'])} → {', '.join(insert_data['before_jungsan_ID'])}```")
-		embed.set_footer(text = f"{insert_data['modifydate'].strftime('%Y-%m-%d %H:%M:%S')} 수정!")
+		embed.set_footer(text = f"{insert_data['modifydate'].strftime('%y-%m-%d %H:%M:%S')} 수정!")
 		await ctx.send(embed = embed)
 
 		data_regist_warning_message = await ctx.send(f"**입력하신 수정 내역을 확인해 보세요!**\n**수정 : ⭕ 취소: ❌**\n({basicSetting[5]}초 동안 입력이 없을시 수정이 취소됩니다.)", tts=False)
@@ -2065,7 +2116,7 @@ class manageCog(commands.Cog):
 					color=0x00ff00
 					)
 		embed.add_field(name = "[ 순번 ]", value = f"```{jungsan_data['_id']}```", inline = False)
-		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%Y-%m-%d %H:%M:%S')}```", inline = False)
+		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%y-%m-%d %H:%M:%S')}```", inline = False)
 		embed.add_field(name = "[ 보스 ]", value = f"```{jungsan_data['boss']}```")
 		embed.add_field(name = "[ 아이템 ]", value = f"```{jungsan_data['item']}```")
 		embed.add_field(name = "[ 루팅 ]", value = f"```{jungsan_data['toggle']}```")
@@ -2136,14 +2187,14 @@ class manageCog(commands.Cog):
 				color=0x00ff00
 				)
 		embed.add_field(name = "[ 순번 ]", value = f"```{jungsan_data['_id']}```", inline = False)
-		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%Y-%m-%d %H:%M:%S')}```", inline = False)
+		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%y-%m-%d %H:%M:%S')}```", inline = False)
 		embed.add_field(name = "[ 보스 ]", value = f"```{jungsan_data['boss']} → {insert_data['boss']}```")
 		embed.add_field(name = "[ 아이템 ]", value = f"```{jungsan_data['item']}```")
 		embed.add_field(name = "[ 루팅 ]", value = f"```{jungsan_data['toggle']}```")
 		embed.add_field(name = "[ 상태 ]", value = f"```{jungsan_data['itemstatus']}```")
 		embed.add_field(name = "[ 판매금 ]", value = f"```{jungsan_data['price']}```")
 		embed.add_field(name = "[ 참여자 ]", value = f"```{', '.join(jungsan_data['before_jungsan_ID'])}```")
-		embed.set_footer(text = f"{insert_data['modifydate'].strftime('%Y-%m-%d %H:%M:%S')} 수정!")
+		embed.set_footer(text = f"{insert_data['modifydate'].strftime('%y-%m-%d %H:%M:%S')} 수정!")
 		await ctx.send(embed = embed)
 
 		data_regist_warning_message = await ctx.send(f"**입력하신 수정 내역을 확인해 보세요!**\n**수정 : ⭕ 취소: ❌**\n({basicSetting[5]}초 동안 입력이 없을시 수정이 취소됩니다.)", tts=False)
@@ -2211,14 +2262,14 @@ class manageCog(commands.Cog):
 				color=0x00ff00
 				)
 		embed.add_field(name = "[ 순번 ]", value = f"```{jungsan_data['_id']}```", inline = False)
-		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%Y-%m-%d %H:%M:%S')}```", inline = False)
+		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%y-%m-%d %H:%M:%S')}```", inline = False)
 		embed.add_field(name = "[ 보스 ]", value = f"```{jungsan_data['boss']}```")
 		embed.add_field(name = "[ 아이템 ]", value = f"```{jungsan_data['item']} → {insert_data['item']}```")
 		embed.add_field(name = "[ 루팅 ]", value = f"```{jungsan_data['toggle']}```")
 		embed.add_field(name = "[ 상태 ]", value = f"```{jungsan_data['itemstatus']}```")
 		embed.add_field(name = "[ 판매금 ]", value = f"```{jungsan_data['price']}```")
 		embed.add_field(name = "[ 참여자 ]", value = f"```{', '.join(jungsan_data['before_jungsan_ID'])}```")
-		embed.set_footer(text = f"{insert_data['modifydate'].strftime('%Y-%m-%d %H:%M:%S')} 수정!")
+		embed.set_footer(text = f"{insert_data['modifydate'].strftime('%y-%m-%d %H:%M:%S')} 수정!")
 		await ctx.send(embed = embed)
 
 		data_regist_warning_message = await ctx.send(f"**입력하신 수정 내역을 확인해 보세요!**\n**수정 : ⭕ 취소: ❌**\n({basicSetting[5]}초 동안 입력이 없을시 수정이 취소됩니다.)", tts=False)
@@ -2306,14 +2357,14 @@ class manageCog(commands.Cog):
 				color=0x00ff00
 				)
 		embed.add_field(name = "[ 순번 ]", value = f"```{jungsan_data['_id']}```", inline = False)
-		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%Y-%m-%d %H:%M:%S')}```", inline = False)
+		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%y-%m-%d %H:%M:%S')}```", inline = False)
 		embed.add_field(name = "[ 보스 ]", value = f"```{jungsan_data['boss']}```")
 		embed.add_field(name = "[ 아이템 ]", value = f"```{jungsan_data['item']}```")
 		embed.add_field(name = "[ 루팅 ]", value = f"```{jungsan_data['toggle']} → {insert_data['toggle']}```")
 		embed.add_field(name = "[ 상태 ]", value = f"```{jungsan_data['itemstatus']}```")
 		embed.add_field(name = "[ 판매금 ]", value = f"```{jungsan_data['price']}```")
 		embed.add_field(name = "[ 참여자 ]", value = f"```{', '.join(jungsan_data['before_jungsan_ID'])}```")
-		embed.set_footer(text = f"{insert_data['modifydate'].strftime('%Y-%m-%d %H:%M:%S')} 수정!")
+		embed.set_footer(text = f"{insert_data['modifydate'].strftime('%y-%m-%d %H:%M:%S')} 수정!")
 		await ctx.send(embed = embed)
 
 		data_regist_warning_message = await ctx.send(f"**입력하신 수정 내역을 확인해 보세요!**\n**수정 : ⭕ 취소: ❌**\n({basicSetting[5]}초 동안 입력이 없을시 수정이 취소됩니다.)", tts=False)
@@ -2391,14 +2442,14 @@ class manageCog(commands.Cog):
 				color=0x00ff00
 				)
 		embed.add_field(name = "[ 순번 ]", value = f"```{jungsan_data['_id']}```", inline = False)
-		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%Y-%m-%d %H:%M:%S')}```", inline = False)
+		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%y-%m-%d %H:%M:%S')}```", inline = False)
 		embed.add_field(name = "[ 보스 ]", value = f"```{jungsan_data['boss']}```")
 		embed.add_field(name = "[ 아이템 ]", value = f"```{jungsan_data['item']}```")
 		embed.add_field(name = "[ 루팅 ]", value = f"```{jungsan_data['toggle']}```")
 		embed.add_field(name = "[ 상태 ]", value = f"```{jungsan_data['itemstatus']}```")
 		embed.add_field(name = "[ 판매금 ]", value = f"```{jungsan_data['price']}```")
 		embed.add_field(name = "[ 참여자 ]", value = f"```{', '.join(jungsan_data['before_jungsan_ID'])} → {', '.join(insert_data['before_jungsan_ID'])}```")
-		embed.set_footer(text = f"{insert_data['modifydate'].strftime('%Y-%m-%d %H:%M:%S')} 수정!")
+		embed.set_footer(text = f"{insert_data['modifydate'].strftime('%y-%m-%d %H:%M:%S')} 수정!")
 		await ctx.send(embed = embed)
 
 		data_regist_warning_message = await ctx.send(f"**입력하신 수정 내역을 확인해 보세요!**\n**수정 : ⭕ 취소: ❌**\n({basicSetting[5]}초 동안 입력이 없을시 수정이 취소됩니다.)", tts=False)
@@ -2479,14 +2530,87 @@ class manageCog(commands.Cog):
 				color=0x00ff00
 				)
 		embed.add_field(name = "[ 순번 ]", value = f"```{jungsan_data['_id']}```", inline = False)
-		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%Y-%m-%d %H:%M:%S')}```", inline = False)
+		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%y-%m-%d %H:%M:%S')}```", inline = False)
 		embed.add_field(name = "[ 보스 ]", value = f"```{jungsan_data['boss']}```")
 		embed.add_field(name = "[ 아이템 ]", value = f"```{jungsan_data['item']}```")
 		embed.add_field(name = "[ 루팅 ]", value = f"```{jungsan_data['toggle']}```")
 		embed.add_field(name = "[ 상태 ]", value = f"```{jungsan_data['itemstatus']}```")
 		embed.add_field(name = "[ 판매금 ]", value = f"```{jungsan_data['price']}```")
 		embed.add_field(name = "[ 참여자 ]", value = f"```{', '.join(jungsan_data['before_jungsan_ID'])} → {', '.join(insert_data['before_jungsan_ID'])}```")
-		embed.set_footer(text = f"{insert_data['modifydate'].strftime('%Y-%m-%d %H:%M:%S')} 수정!")
+		embed.set_footer(text = f"{insert_data['modifydate'].strftime('%y-%m-%d %H:%M:%S')} 수정!")
+		await ctx.send(embed = embed)
+
+		data_regist_warning_message = await ctx.send(f"**입력하신 수정 내역을 확인해 보세요!**\n**수정 : ⭕ 취소: ❌**\n({basicSetting[5]}초 동안 입력이 없을시 수정이 취소됩니다.)", tts=False)
+
+		emoji_list : list = ["⭕", "❌"]
+		for emoji in emoji_list:
+			await data_regist_warning_message.add_reaction(emoji)
+
+		def reaction_check(reaction, user):
+			return (reaction.message.id == data_regist_warning_message.id) and (user.id == ctx.author.id) and (str(reaction) in emoji_list)
+
+		try:
+			reaction, user = await self.bot.wait_for('reaction_add', check = reaction_check, timeout = int(basicSetting[5]))
+		except asyncio.TimeoutError:
+			for emoji in emoji_list:
+				await data_regist_warning_message.remove_reaction(emoji, self.bot.user)
+			return await ctx.send(f"시간이 초과됐습니다. **수정**을 취소합니다!")
+
+		if str(reaction) == "⭕":
+			result = self.jungsan_db.update_one({"_id":jungsan_data['_id']}, {"$set":insert_data}, upsert = False)
+			if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
+				return await ctx.send(f"{ctx.author.mention}, 정산 등록 내역 수정 실패.") 
+
+			return await ctx.send(f"📥 정산 등록 내역 수정 완료! 📥")
+		else:
+			return await ctx.send(f"**수정**이 취소되었습니다.\n")
+
+	################ 이미지 수정 ################ 
+	@commands.command(name=commandSetting[50][0], aliases=commandSetting[50][1:])
+	async def modify_regist_image_data(self, ctx, *, args : str = None):
+		if ctx.message.channel.id != int(basicSetting[6]) or basicSetting[6] == "":
+			return
+
+		member_data : dict = self.member_db.find_one({"_id":ctx.author.id})
+
+		if not member_data:
+			return await ctx.send(f"{ctx.author.mention}님은 혈원으로 등록되어 있지 않습니다!")
+
+		if not args:
+			return await ctx.send(f"**{commandSetting[50][0]} [순번] [수정이미지 url]** 양식으로 등록 해주세요")
+		
+		input_regist_data : list = args.split()
+		len_input_regist_data = len(input_regist_data)
+
+		if len_input_regist_data != 2:
+			return await ctx.send(f"**{commandSetting[50][0]} [순번] [수정이미지 url]** 양식으로 등록 해주세요")
+		
+		jungsan_data : dict = self.jungsan_db.find_one({"$and" : [{"$or" : [{"toggle_ID" : str(ctx.author.id)}, {"regist_ID" : str(ctx.author.id)}]}, {"_id":int(input_regist_data[0])}, {"itemstatus":"미판매"}]})
+		
+		if not jungsan_data:
+			return await ctx.send(f"{ctx.author.mention}님! 등록하신 정산 내역이 **[ 미판매 ]**중이 아니거나 없습니다. **[ {commandSetting[13][0]}/{commandSetting[16][0]} ]** 명령을 통해 확인해주세요.\n※정산 등록 내역 수정은 **[ 분배상태 ]**가 **[ 미판매 ]** 중인 등록건만 수정 가능합니다!")
+
+		input_time : datetime = datetime.datetime.now() + datetime.timedelta(hours = int(basicSetting[8]))
+		insert_data : dict = {}
+		insert_data = jungsan_data.copy()
+		insert_data["image_url"] = input_regist_data[1]
+		insert_data["modifydate"] = input_time
+		
+		embed = discord.Embed(
+				title = "📜 수정 정보",
+				description = "",
+				color=0x00ff00
+				)
+		embed.add_field(name = "[ 순번 ]", value = f"```{jungsan_data['_id']}```", inline = False)
+		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%y-%m-%d %H:%M:%S')}```", inline = False)
+		embed.add_field(name = "[ 보스 ]", value = f"```{jungsan_data['boss']}```")
+		embed.add_field(name = "[ 아이템 ]", value = f"```{jungsan_data['item']}```")
+		embed.add_field(name = "[ 루팅 ]", value = f"```{jungsan_data['toggle']}```")
+		embed.add_field(name = "[ 상태 ]", value = f"```{jungsan_data['itemstatus']}```")
+		embed.add_field(name = "[ 판매금 ]", value = f"```{jungsan_data['price']}```")
+		embed.add_field(name = "[ 참여자 ]", value = f"```{', '.join(jungsan_data['before_jungsan_ID'])}```")
+		embed.set_image(url = insert_data["image_url"])
+		embed.set_footer(text = f"{insert_data['modifydate'].strftime('%y-%m-%d %H:%M:%S')} 수정!")
 		await ctx.send(embed = embed)
 
 		data_regist_warning_message = await ctx.send(f"**입력하신 수정 내역을 확인해 보세요!**\n**수정 : ⭕ 취소: ❌**\n({basicSetting[5]}초 동안 입력이 없을시 수정이 취소됩니다.)", tts=False)
@@ -2607,17 +2731,20 @@ class manageCog(commands.Cog):
 		if input_sell_price_data[2] < 1:
 			return await ctx.send(f"{ctx.author.mention}님! 추첨인원이 0보다 작거나 같습니다. 재입력 해주세요")
 
+		ladder_check : bool = False
+
 		if len(jungsan_data["before_jungsan_ID"]) > input_sell_price_data[2]:
 			result_ladder = random.sample(jungsan_data["before_jungsan_ID"], input_sell_price_data[2])
 			await ctx.send(f"**[ {', '.join(jungsan_data['before_jungsan_ID'])} ]** 중 **[ {', '.join(result_ladder)} ]** 당첨! 분배를 시작합니다.")
 			result_each_price = int(input_sell_price_data[1]//input_sell_price_data[2])   # 혈비일 경우 수수로 계산 입력 예정
+			ladder_check = True
 		else:
 			return await ctx.send(f"{ctx.author.mention}님! 추첨인원이 총 인원과 같거나 많습니다. 재입력 해주세요")
 
 		if jungsan_data["gulid_money_insert"]:
 			after_tax_price : int = int(input_sell_price_data[1]*(1-(basicSetting[7]/100)))
 			result_each_price : int = int(after_tax_price//input_sell_price_data[2])
-			result = self.jungsan_db.update_one({"_id":input_sell_price_data[0]}, {"$set":{"price":after_tax_price, "each_price":result_each_price, "before_jungsan_ID":[], "after_jungsan_ID":result_ladder, "itemstatus":"분배완료"}}, upsert = False)
+			result = self.jungsan_db.update_one({"_id":input_sell_price_data[0]}, {"$set":{"price":after_tax_price, "each_price":result_each_price, "before_jungsan_ID":[], "after_jungsan_ID":result_ladder, "itemstatus":"분배완료", "ladder_check":ladder_check}}, upsert = False)
 			if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
 				return await ctx.send(f"{ctx.author.mention}, 혈비 등록 실패.")
 			result_guild = self.guild_db.update_one({"_id":"guild"}, {"$inc":{"guild_money":after_tax_price}}, upsert = True)
@@ -2633,7 +2760,7 @@ class manageCog(commands.Cog):
 			result_guild_log = self.guild_db_log.insert_one(insert_log_data)
 			return await ctx.send(f"**[ 순번 : {input_sell_price_data[0]} ]**   💰판매금 **[ {after_tax_price} ]**(세율 {basicSetting[7]}% 적용) 혈비 적립 완료!")
 		
-		result = self.jungsan_db.update_one({"_id":input_sell_price_data[0]}, {"$set":{"price":input_sell_price_data[1], "each_price":result_each_price, "before_jungsan_ID":result_ladder, "itemstatus":"분배중"}}, upsert = False)
+		result = self.jungsan_db.update_one({"_id":input_sell_price_data[0]}, {"$set":{"price":input_sell_price_data[1], "each_price":result_each_price, "before_jungsan_ID":result_ladder, "itemstatus":"분배중", "ladder_check":ladder_check}}, upsert = False)
 		if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
 			return await ctx.send(f"{ctx.author.mention}, 판매 등록 실패.") 			
 
@@ -2809,7 +2936,7 @@ class manageCog(commands.Cog):
 					)
 				embed_list.append(tmp_embed)
 			detail_info_ing = f"```diff\n+ 분 배 중 : {len(jungsan_data['before_jungsan_ID'])}명 (💰{len(jungsan_data['before_jungsan_ID'])*jungsan_data['each_price']})\n{', '.join(jungsan_data['before_jungsan_ID'])}\n- 분배완료 : {len(jungsan_data['after_jungsan_ID'])}명  (💰{len(jungsan_data['after_jungsan_ID'])*jungsan_data['each_price']})\n{', '.join(jungsan_data['after_jungsan_ID'])}```"
-			embed_list[embed_cnt].add_field(name = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%Y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']} : 1인당 💰{jungsan_data['each_price']}",
+			embed_list[embed_cnt].add_field(name = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']} : 1인당 💰{jungsan_data['each_price']}",
 							value = detail_info_ing,
 							inline = False)
 			total_distribute_money += len(jungsan_data['before_jungsan_ID'])*int(jungsan_data['each_price'])
@@ -3032,7 +3159,7 @@ class bankCog(commands.Cog):
 		if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
 			return await ctx.send(f"{ctx.author.mention}, 은행 저축 실패.")		
 
-		return await ctx.send(f"**[ 순번 : {input_sell_price_data[0]} ]**   💰판매금 **[ {after_tax_price} ]**(세율 {basicSetting[7]}% 적용)  인당 **💰 [ {result_each_price} ]** 은행 저축 완료!")
+		return await ctx.send(f"**[ 순번 : {input_sell_price_data[0]} ]**   💰판매금 **[ {after_tax_price} ]**(세율 {basicSetting[7]}% 적용)\n**{jungsan_document['before_jungsan_ID']}**계좌로 인당 **💰 [ {result_each_price} ]** 은행 저축 완료!")
 
 	################ 뽑기저축 ################ 
 	@commands.command(name=commandSetting[48][0], aliases=commandSetting[48][1:])
@@ -3067,11 +3194,13 @@ class bankCog(commands.Cog):
 		
 		if input_sell_price_data[2] < 1:
 			return await ctx.send(f"{ctx.author.mention}님! 추첨인원이 0보다 작거나 같습니다. 재입력 해주세요")
+		
+		ladder_check : bool = False
 
 		if len(jungsan_document["before_jungsan_ID"]) > input_sell_price_data[2]:
 			result_ladder = random.sample(jungsan_document["before_jungsan_ID"], input_sell_price_data[2])
 			await ctx.send(f"**[ {', '.join(jungsan_document['before_jungsan_ID'])} ]** 중 **[ {', '.join(result_ladder)} ]** 당첨! 해당 인원의 계좌로 저축합니다.")
-			
+			ladder_check = True
 		else:
 			return await ctx.send(f"{ctx.author.mention}님! 추첨인원이 총 인원과 같거나 많습니다. 재입력 해주세요")
 		
@@ -3089,14 +3218,15 @@ class bankCog(commands.Cog):
 					"each_price":result_each_price,
 					"before_jungsan_ID":[],
 					"after_jungsan_ID":participant_list,
-					"bank_money_insert":True
+					"bank_money_insert":True,
+					"ladder_check":ladder_check
 					}
 
 		result = self.jungsan_db.update_one({"_id":input_sell_price_data[0]}, {"$set":insert_data}, upsert = False)
 		if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
 			return await ctx.send(f"{ctx.author.mention}, 은행 저축 실패.")		
 
-		return await ctx.send(f"**[ 순번 : {input_sell_price_data[0]} ]**   💰판매금 **[ {after_tax_price} ]**(세율 {basicSetting[7]}% 적용)  인당 **💰 [ {result_each_price} ]** 은행 저축 완료!")
+		return await ctx.send(f"**[ 순번 : {input_sell_price_data[0]} ]**   💰판매금 **[ {after_tax_price} ]**(세율 {basicSetting[7]}% 적용)\n**{participant_list}**계좌로 인당 **💰 [ {result_each_price} ]** 은행 저축 완료!")
 
 	################ 입금 #################
 	@is_manager() 
