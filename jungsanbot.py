@@ -1138,7 +1138,15 @@ class manageCog(commands.Cog):
 					if not jungsan_document:
 						return await ctx.send(f"{ctx.author.mention}님! 수령할 정산 내역이 없습니다.")
 					embed = get_detail_embed(jungsan_document)
-					return await ctx.send(embed = embed)
+					try:
+						return await ctx.send(embed = embed)
+					except Exception:
+						embed.add_field(name = "🚫  이미지 링크 확인 필요  🚫", value = f"```저장된 이미지가 삭제됐습니다.```")
+						embed.set_image(url = "")
+						result1 = self.jungsan_db.update_one({"_id":input_distribute_all_finish[1]}, {"$set":{"image_url":""}}, upsert = True)
+						if result1.raw_result["nModified"] < 1 and "upserted" not in result1.raw_result:
+							return await ctx.send(f"{ctx.author.mention}, 정산 등록 실패.") 
+						return await ctx.send(embed = embed)
 				elif input_distribute_all_finish[0] == "보스명":
 					jungsan_document = list(self.jungsan_db.find({"$and" : [{"before_jungsan_ID" : member_data['game_ID']}, {"boss":input_distribute_all_finish[1]}, {"$or" : [{"itemstatus" : "분배중"}, {"itemstatus" : "미판매"}]}]}))
 				elif input_distribute_all_finish[0] == "아이템":
@@ -1269,7 +1277,8 @@ class manageCog(commands.Cog):
 			gulid_money_insert_check = False
 			loot_member_data = self.member_db.find_one({"game_ID":input_regist_data[2]})
 			if not loot_member_data:
-				return await ctx.send(f"```루팅자 [{input_regist_data[2]}](은)는 혈원으로 등록되지 않은 아이디 입니다.```")
+				wrong_input_id.append(f"💥{input_regist_data[2]}")
+				#return await ctx.send(f"```루팅자 [{input_regist_data[2]}](은)는 혈원으로 등록되지 않은 아이디 입니다.```")
 
 		check_member_data = list(self.member_db.find())
 		for game_id in check_member_data:
@@ -1280,7 +1289,7 @@ class manageCog(commands.Cog):
 				wrong_input_id.append(game_id)
 
 		if len(wrong_input_id) > 0:
-			return await ctx.send(f"```참여자 [{', '.join(wrong_input_id)}](은)는 혈원으로 등록되지 않은 아이디 입니다.```")
+			return await ctx.send(f"```[{', '.join(wrong_input_id)}](은)는 혈원으로 등록되지 않은 아이디 입니다.```")
 		
 		input_time : datetime = datetime.datetime.now() + datetime.timedelta(hours = int(basicSetting[8]))
 		insert_data : dict = {}
@@ -1399,7 +1408,15 @@ class manageCog(commands.Cog):
 					if not jungsan_document:
 						return await ctx.send(f"{ctx.author.mention}님! 등록된 정산 목록이 없습니다.")
 					embed = get_detail_embed(jungsan_document)
-					return await ctx.send(embed = embed)
+					try:
+						return await ctx.send(embed = embed)
+					except Exception:
+						embed.add_field(name = "🚫  이미지 링크 확인 필요  🚫", value = f"```저장된 이미지가 삭제됐습니다.```")
+						embed.set_image(url = "")
+						result1 = self.jungsan_db.update_one({"_id":input_distribute_all_finish[1]}, {"$set":{"image_url":""}}, upsert = True)
+						if result1.raw_result["nModified"] < 1 and "upserted" not in result1.raw_result:
+							return await ctx.send(f"{ctx.author.mention}, 정산 등록 실패.") 
+						return await ctx.send(embed = embed)
 				elif input_distribute_all_finish[0] == "보스명":
 					jungsan_document : list = list(self.jungsan_db.find({"boss":input_distribute_all_finish[1]}))
 				elif input_distribute_all_finish[0] == "아이템":
@@ -1548,7 +1565,15 @@ class manageCog(commands.Cog):
 					if not jungsan_document:
 						return await ctx.send(f"{ctx.author.mention}님! 등록된 정산 목록이 없습니다.")
 					embed = get_detail_embed(jungsan_document)
-					return await ctx.send(embed = embed)
+					try:
+						return await ctx.send(embed = embed)
+					except Exception:
+						embed.add_field(name = "🚫  이미지 링크 확인 필요  🚫", value = f"```저장된 이미지가 삭제됐습니다.```")
+						embed.set_image(url = "")
+						result1 = self.jungsan_db.update_one({"_id":input_distribute_all_finish[1]}, {"$set":{"image_url":""}}, upsert = True)
+						if result1.raw_result["nModified"] < 1 and "upserted" not in result1.raw_result:
+							return await ctx.send(f"{ctx.author.mention}, 정산 등록 실패.") 
+						return await ctx.send(embed = embed)
 				elif input_distribute_all_finish[0] == "보스명":
 					jungsan_document : list = list(self.jungsan_db.find({"regist_ID":str(ctx.author.id), "boss":input_distribute_all_finish[1]}))
 				elif input_distribute_all_finish[0] == "아이템":
@@ -1695,7 +1720,8 @@ class manageCog(commands.Cog):
 			gulid_money_insert_check = False
 			loot_member_data = self.member_db.find_one({"game_ID":input_regist_data[2]})
 			if not loot_member_data:
-				return await ctx.send(f"```루팅자 [{input_regist_data[2]}](은)는 혈원으로 등록되지 않은 아이디 입니다.```")
+				wrong_input_id.append(f"💥{input_regist_data[2]}")
+				#return await ctx.send(f"```루팅자 [{input_regist_data[2]}](은)는 혈원으로 등록되지 않은 아이디 입니다.```")
 
 		check_member_data = list(self.member_db.find())
 		for game_id in check_member_data:
@@ -1708,7 +1734,7 @@ class manageCog(commands.Cog):
 				wrong_input_id.append(game_id)
 		
 		if len(wrong_input_id) > 0:
-			return await ctx.send(f"```참여자 [{', '.join(wrong_input_id)}](은)는 혈원으로 등록되지 않은 아이디 입니다.```")
+			return await ctx.send(f"```[{', '.join(wrong_input_id)}](은)는 혈원으로 등록되지 않은 아이디 입니다.```")
 		
 		input_time : datetime = datetime.datetime.now() + datetime.timedelta(hours = int(basicSetting[8]))
 		insert_data : dict = {}
@@ -1867,7 +1893,15 @@ class manageCog(commands.Cog):
 					if not jungsan_document:
 						return await ctx.send(f"{ctx.author.mention}님! 등록된 정산 목록이 없습니다.")
 					embed = get_detail_embed(jungsan_document)
-					return await ctx.send(embed = embed)
+					try:
+						return await ctx.send(embed = embed)
+					except Exception:
+						embed.add_field(name = "🚫  이미지 링크 확인 필요  🚫", value = f"```저장된 이미지가 삭제됐습니다.```")
+						embed.set_image(url = "")
+						result1 = self.jungsan_db.update_one({"_id":input_distribute_all_finish[1]}, {"$set":{"image_url":""}}, upsert = True)
+						if result1.raw_result["nModified"] < 1 and "upserted" not in result1.raw_result:
+							return await ctx.send(f"{ctx.author.mention}, 정산 등록 실패.") 
+						return await ctx.send(embed = embed)
 				elif input_distribute_all_finish[0] == "보스명":
 					jungsan_document : list = list(self.jungsan_db.find({"toggle_ID":str(ctx.author.id), "boss":input_distribute_all_finish[1]}))
 				elif input_distribute_all_finish[0] == "아이템":
@@ -2014,7 +2048,8 @@ class manageCog(commands.Cog):
 			gulid_money_insert_check = False
 			loot_member_data = self.member_db.find_one({"game_ID":input_regist_data[2]})
 			if not loot_member_data:
-				return await ctx.send(f"```루팅자 [{input_regist_data[2]}](은)는 혈원으로 등록되지 않은 아이디 입니다.```")
+				wrong_input_id.append(f"💥{input_regist_data[2]}")
+				#return await ctx.send(f"```루팅자 [{input_regist_data[2]}](은)는 혈원으로 등록되지 않은 아이디 입니다.```")
 
 		check_member_data = list(self.member_db.find())
 		for game_id in check_member_data:
@@ -2027,7 +2062,7 @@ class manageCog(commands.Cog):
 				wrong_input_id.append(game_id)
 
 		if len(wrong_input_id) > 0:
-			return await ctx.send(f"```참여자 [{', '.join(wrong_input_id)}](은)는 혈원으로 등록되지 않은 아이디 입니다.```")
+			return await ctx.send(f"```[{', '.join(wrong_input_id)}](은)는 혈원으로 등록되지 않은 아이디 입니다.```")
 		
 		input_time : datetime = datetime.datetime.now() + datetime.timedelta(hours = int(basicSetting[8]))
 		insert_data : dict = {}
@@ -2611,8 +2646,13 @@ class manageCog(commands.Cog):
 		embed.add_field(name = "[ 참여자 ]", value = f"```{', '.join(jungsan_data['before_jungsan_ID'])}```")
 		embed.set_image(url = insert_data["image_url"])
 		embed.set_footer(text = f"{insert_data['modifydate'].strftime('%y-%m-%d %H:%M:%S')} 수정!")
-		await ctx.send(embed = embed)
-
+		try:
+			await ctx.send(embed = embed)
+		except Exception:
+			embed.add_field(name = "🚫  이미지 링크 확인 필요  🚫", value = f"```저장된 이미지가 삭제됩니다.```")
+			insert_data["image_url"] = ""
+			embed.set_image(url = insert_data["image_url"])
+			await ctx.send(embed = embed)
 		data_regist_warning_message = await ctx.send(f"**입력하신 수정 내역을 확인해 보세요!**\n**수정 : ⭕ 취소: ❌**\n({basicSetting[5]}초 동안 입력이 없을시 수정이 취소됩니다.)", tts=False)
 
 		emoji_list : list = ["⭕", "❌"]
