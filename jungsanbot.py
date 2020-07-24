@@ -787,7 +787,7 @@ class adminCog(commands.Cog):
 			detail_info	: str = ""
 			for result_data in result:
 				embed_limit_checker += 1
-				if embed_limit_checker == 40:
+				if embed_limit_checker == 20:
 					embed_limit_checker = 0
 					embed_cnt += 1
 					tmp_embed = discord.Embed(
@@ -3552,17 +3552,38 @@ class bankCog(commands.Cog):
 		len_sorted_item_counts = len(sorted_item_counts)
 		#print(sorted_item_counts)
 
+		embed_list : list = []
+		embed_index : int = 0
+		embed_cnt : int = 0
+
 		embed = discord.Embed(title = '', description = f'📦  `창고 내역`', color = 0x00ff00)
+
+		embed_list.append(embed)
 
 		if len_sorted_item_counts > 0 :
 			for item_data in sorted_item_counts:
-				embed.add_field(name = item_data['_id'], value = f"```{item_data['count']}```")
+				embed_cnt += 1
+				if embed_cnt > 24 :
+					embed_cnt = 0
+					embed_index += 1
+					tmp_embed = discord.Embed(
+						title = "",
+						description = "",
+						color=0x00ff00
+						)
+					embed_list.append(tmp_embed)
+				embed_list[embed_index].add_field(name = item_data['_id'], value = f"```{item_data['count']}```")
+			embed.set_footer(text = f"전체 아이템 종류  :  {len_sorted_item_counts}개")
+			if len(embed_list) > 1:
+				for embed_data in embed_list:
+					await asyncio.sleep(0.1)
+					await ctx.send(embed = embed_data)
+				return
+			else:
+				return await ctx.send(embed=embed, tts=False)
 		else :
 			embed.add_field(name = '\u200b\n', value = '창고가 비었습니다.\n\u200b')
-
-		embed.set_footer(text = f"전체 아이템 종류  :  {len_sorted_item_counts}개")
-
-		return await ctx.send(embed=embed, tts=False)
+			return await ctx.send(embed=embed, tts=False)
 
 ilsang_distribution_bot : IlsangDistributionBot = IlsangDistributionBot()
 ilsang_distribution_bot.add_cog(settingCog(ilsang_distribution_bot))
