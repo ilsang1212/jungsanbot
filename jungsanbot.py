@@ -42,13 +42,22 @@ logging.basicConfig(stream=log_stream, level=logging.WARNING)
 #ilsanglog.addHandler(handler)
 #####################################################
 
-access_token = os.environ["BOT_TOKEN"]
-git_access_token = os.environ["GIT_TOKEN"]
-git_access_repo = os.environ["GIT_REPO"]	
-mongoDB_HOST = os.environ["MONGODB_HOST"]
-user_ID = os.environ["USER_ID"]
-user_PASSWORD = os.environ["USER_PW"]
-time_Zone = os.environ["TIME_ZONE"]
+
+access_token = "NzA0NTE1NDEyMTU4NTc4NzA4.XxZp-Q.YhrRNlXaszuo8mV3tZLs8_t1TI4"
+git_access_token = "7f21bb1e56420608768fd5fcab2543e54ae3d1a6"
+git_access_repo = "ilsang1212/jungsanbot"
+mongoDB_HOST = "cluster0-shard-00-00.27se1.mongodb.net:27017, cluster0-shard-00-01.27se1.mongodb.net:27017, cluster0-shard-00-02.27se1.mongodb.net:27017"
+user_ID = "ilsang"
+user_PASSWORD = "236541-ac"
+time_Zone = 9
+
+# access_token = os.environ["BOT_TOKEN"]
+# git_access_token = os.environ["GIT_TOKEN"]
+# git_access_repo = os.environ["GIT_REPO"]	
+# mongoDB_HOST = os.environ["MONGODB_HOST"]
+# user_ID = os.environ["USER_ID"]
+# user_PASSWORD = os.environ["USER_PW"]
+# time_Zone = os.environ["TIME_ZONE"]
 
 g = Github(git_access_token)
 repo = g.get_repo(git_access_repo)
@@ -226,7 +235,6 @@ class IlsangDistributionBot(commands.AutoShardedBot):
 		await self.wait_until_ready()
 		if basicSetting[6] != "" and basicSetting[6] != 0 :
 			backup_date = datetime.datetime.now() - datetime.timedelta(days = int(basicSetting[4])) + datetime.timedelta(hours = int(basicSetting[8]))
-			log_delete_date = datetime.datetime.now() - datetime.timedelta(days = int(30))
 			
 			jungsan_document :list = []
 			delete_jungsan_id : list = []
