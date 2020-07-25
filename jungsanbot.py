@@ -42,13 +42,22 @@ logging.basicConfig(stream=log_stream, level=logging.WARNING)
 #ilsanglog.addHandler(handler)
 #####################################################
 
-access_token = os.environ["BOT_TOKEN"]
-git_access_token = os.environ["GIT_TOKEN"]
-git_access_repo = os.environ["GIT_REPO"]	
-mongoDB_HOST = os.environ["MONGODB_HOST"]
-user_ID = os.environ["USER_ID"]
-user_PASSWORD = os.environ["USER_PW"]
-time_Zone = os.environ["TIME_ZONE"]
+
+access_token = "NzA0NTE1NDEyMTU4NTc4NzA4.XxZp-Q.YhrRNlXaszuo8mV3tZLs8_t1TI4"
+git_access_token = "7f21bb1e56420608768fd5fcab2543e54ae3d1a6"
+git_access_repo = "ilsang1212/jungsanbot"
+mongoDB_HOST = "cluster0-shard-00-00.27se1.mongodb.net:27017, cluster0-shard-00-01.27se1.mongodb.net:27017, cluster0-shard-00-02.27se1.mongodb.net:27017"
+user_ID = "ilsang"
+user_PASSWORD = "236541-ac"
+time_Zone = 9
+
+# access_token = os.environ["BOT_TOKEN"]
+# git_access_token = os.environ["GIT_TOKEN"]
+# git_access_repo = os.environ["GIT_REPO"]	
+# mongoDB_HOST = os.environ["MONGODB_HOST"]
+# user_ID = os.environ["USER_ID"]
+# user_PASSWORD = os.environ["USER_PW"]
+# time_Zone = os.environ["TIME_ZONE"]
 
 g = Github(git_access_token)
 repo = g.get_repo(git_access_repo)
@@ -3382,21 +3391,6 @@ class bankCog(commands.Cog):
 			args = int(args)
 		except ValueError:
 			return await ctx.send(f"**[금액]**은 숫자로 입력 해주세요")
-
-		check_member_data : list = []
-		check_member_list : list = []
-		wrong_input_id : list = []
-
-		check_member_data = list(self.member_db.find())
-		for game_id in check_member_data:
-			check_member_list.append(game_id['game_ID'])
-
-		for game_id in input_guild_support_money_ID_data[1:]:
-			if game_id not in check_member_list:
-				wrong_input_id.append(game_id)
-
-		if len(wrong_input_id) > 0:
-			return await ctx.send(f"```지원자 [{', '.join(wrong_input_id)}](은)는 혈원으로 등록되지 않은 아이디 입니다.```")	
 
 		result_guild_update : dict = self.guild_db.update_one({"_id":"guild"}, {"$inc":{"guild_money":args}}, upsert = True)
 		if result_guild_update.raw_result["nModified"] < 1 and "upserted" not in result_guild_update.raw_result:
