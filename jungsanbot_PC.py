@@ -192,7 +192,7 @@ class IlsangDistributionBot(commands.AutoShardedBot):
 				"guild_money":0,
 				"back_up_period":14,
 				"checktime":15,
-				"distributionchannel":"",
+				"distributionchannel":0,
 				"tax":5
 				}
 			update_guild_data : dict = self.db.jungsan.guild.update_one({"_id":"guild"}, {"$set":init_guild_data}, upsert = True)
@@ -680,9 +680,10 @@ class adminCog(commands.Cog):
 	@commands.has_permissions(manage_guild=True)
 	@commands.command(name=commandSetting[2][0], aliases=commandSetting[2][1:])
 	async def initialize_all_guild_data(self, ctx):
+		global basicSetting
 		if ctx.message.channel.id != int(basicSetting[6]) or basicSetting[6] == "":
 			return
-
+		
 		member_data : dict = self.member_db.find_one({"_id":ctx.author.id})
 
 		if not member_data:
@@ -708,8 +709,27 @@ class adminCog(commands.Cog):
 		if str(reaction) == "⭕":
 			self.guild_db.delete_many({})
 			self.guild_db_log.delete_many({})
+			init_guild_data : dict = {
+				"guild_money":0,
+				"back_up_period":14,
+				"checktime":15,
+				"distributionchannel":0,
+				"tax":5
+				}
+			update_guild_data : dict = self.guild_db.update_one({"_id":"guild"}, {"$set":init_guild_data}, upsert = True)
+
+			basicSetting[4] = init_guild_data['back_up_period']
+			basicSetting[5] = init_guild_data['checktime']
+			basicSetting[6] = init_guild_data['distributionchannel']
+			basicSetting[7] = init_guild_data['tax']
+			
+			# basicSetting[4] = backup_period
+			# basicSetting[5] = checktime
+			# basicSetting[6] = distributionchannel
+			# basicSetting[7] = tax
+
 			print(f"< 혈비/로그 데이터 초기화 완료 >")
-			return await ctx.send(f"☠️ 혈비/로그 데이터 초기화 완료! ☠️")
+			return await ctx.send(f"☠️ 혈비/로그 데이터 초기화 완료! ☠️\n**[{commandSetting[36][0]}]** 명령어를 입력하신 후 사용해주시기 바랍니다.")
 		else:
 			return await ctx.send(f"**초기화**가 취소되었습니다.\n")	
 
@@ -769,6 +789,9 @@ class adminCog(commands.Cog):
 
 		result = list(self.guild_db_log.find({}))
 
+		if len(result) == 0:
+			return await ctx.send(f"```혈비 로그가 없습니다!```")
+
 		sorted_result = sorted(list([result_data['log_date'] for result_data in result]))
 
 		log_date_list : list = []
@@ -823,6 +846,7 @@ class adminCog(commands.Cog):
 			else:
 				await asyncio.sleep(0.1)
 				await ctx.send(embed = embed)
+		return
 
 class memberCog(commands.Cog): 
 	def __init__(self, bot):
