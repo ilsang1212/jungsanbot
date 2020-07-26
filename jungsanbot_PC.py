@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*- 
 
-##################################### PC V3 #############################################
+##################################### PC V4 #############################################
 #########################################################################################
 #########################################################################################
 #########################################################################################
@@ -40,6 +40,20 @@ logging.basicConfig(stream=log_stream, level=logging.WARNING)
 #ilsanglog.addHandler(handler)
 #####################################################
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def init():
 	global commandSetting
 	global basicSetting
@@ -77,6 +91,9 @@ def init():
 		fc = tmp_command.split(', ')
 		commandSetting.append(fc)
 		fc = []
+
+
+
 
 init()
 
@@ -190,13 +207,15 @@ class IlsangDistributionBot(commands.AutoShardedBot):
 			basicSetting.append(guild_data['distributionchannel'])
 			basicSetting.append(guild_data['tax'])
 
+
+
+
 		# basicSetting[4] = backup_period
 		# basicSetting[5] = checktime
 		# basicSetting[6] = distributionchannel
 		# basicSetting[7] = tax
 
 		self.backup_data.start()
-
 
 	def run(self):
 		super().run(basicSetting[0], reconnect=True)
@@ -218,7 +237,7 @@ class IlsangDistributionBot(commands.AutoShardedBot):
 
 			for jungsan_data in jungsan_document:
 				cnt += 1
-				total_save_money += int(jungsan_data['price']*(1-(basicSetting[7]/100)))
+				total_save_money += int(jungsan_data['each_price']*len(jungsan_data['before_jungsan_ID'])*(1-(basicSetting[7]/100)))
 				delete_jungsan_id.append(jungsan_data['_id'])
 				del jungsan_data['_id']
 				backup_jungsan_document.append(jungsan_data)
@@ -461,7 +480,7 @@ class adminCog(commands.Cog):
 			return await ctx.send(f"{ctx.author.mention}님은 혈원으로 등록되어 있지 않습니다!")
 
 		embed = discord.Embed(
-			title = f"⚙️ 기본 설정",
+			title = f"⚙️ 기본 설정(v4)",
 			color=0xff00ff
 			)
 		embed.add_field(name = f"🚫 삭제 주기", value = f"```{basicSetting[4]} 일```")
