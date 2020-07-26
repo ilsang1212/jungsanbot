@@ -765,7 +765,11 @@ class adminCog(commands.Cog):
 		if args:
 			return await ctx.send(f"**{commandSetting[47][0]}** 양식으로 등록 해주세요")
 
-		result : list = list(self.guild_db_log.find({}))
+		result : list = []
+
+		result = list(self.guild_db_log.find({}))
+
+		sorted_result = sorted(list([result_data['log_date'] for result_data in result]))
 
 		log_date_list : list = []
 		log_date_list = sorted(list(set([result_data['log_date'].strftime('%y-%m-%d') for result_data in result])))
@@ -784,10 +788,10 @@ class adminCog(commands.Cog):
 					)
 		embed_list.append(embed)
 		for date in log_date_list:
+			embed_limit_checker = 0
 			detail_info	: str = ""
-			for result_data in result:
-				embed_limit_checker += 1
-				if embed_limit_checker == 20:
+			for result_data1 in result:
+				if embed_limit_checker == 50:
 					embed_limit_checker = 0
 					embed_cnt += 1
 					tmp_embed = discord.Embed(
@@ -796,17 +800,18 @@ class adminCog(commands.Cog):
 						color=0x00ff00
 						)
 					embed_list.append(tmp_embed)
-				if result_data['log_date'].strftime('%y-%m-%d') == date:
-					if result_data['in_out_check']:
-						if result_data['reason'] != "":
-							detail_info += f"+ 💰 {result_data['money']} : {', '.join(result_data['member_list'])} (사유:{result_data['reason']})\n"
+				if result_data1['log_date'].strftime('%y-%m-%d') == date:
+					embed_limit_checker += 1
+					if result_data1['in_out_check']:
+						if result_data1['reason'] != "":
+							detail_info += f"+ 💰 {result_data1['money']} : {', '.join(result_data1['member_list'])} (사유:{result_data1['reason']})\n"
 						else:
-							detail_info += f"+ 💰 {result_data['money']} : 혈비 입금\n"
+							detail_info += f"+ 💰 {result_data1['money']} : 혈비 입금\n"
 					else:
-						if result_data['reason'] != "":
-							detail_info += f"- 💰 {result_data['money']} : {', '.join(result_data['member_list'])} (사유:{result_data['reason']})\n"
+						if result_data1['reason'] != "":
+							detail_info += f"- 💰 {result_data1['money']} : {', '.join(result_data1['member_list'])} (사유:{result_data1['reason']})\n"
 						else:
-							detail_info += f"- 💰 {result_data['money']} : {', '.join(result_data['member_list'])}\n"
+							detail_info += f"- 💰 {result_data1['money']} : {', '.join(result_data1['member_list'])}\n"
 				
 				embed_list[embed_cnt].title = f"🗓️ {date}"
 				embed_list[embed_cnt].description = f"```diff\n{detail_info}```"
