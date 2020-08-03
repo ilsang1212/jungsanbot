@@ -152,7 +152,10 @@ def get_detail_embed(info : dict = {}):
 	embed.add_field(name = "[ 루팅 ]", value = f"```{info['toggle']}```")
 	embed.add_field(name = "[ 상태 ]", value = f"```{info['itemstatus']}```")
 	embed.add_field(name = "[ 판매금 ]", value = f"```{info['price']}```")
-	embed.add_field(name = "[ 참여자 ]", value = f"```{', '.join(info['before_jungsan_ID']+info['after_jungsan_ID'])}```")
+	if info['before_jungsan_ID']:
+		embed.add_field(name = "[ 정산전 ]", value = f"```{', '.join(info['before_jungsan_ID'])}```", inline = False)
+	if info['after_jungsan_ID']:
+		embed.add_field(name = "[ 정산후 ]", value = f"```{', '.join(info['after_jungsan_ID'])}```")
 	if 'image_url' in info.keys():
 		if info['image_url'] is not None:
 			embed.set_image(url = info['image_url'])
@@ -2836,6 +2839,79 @@ class manageCog(commands.Cog):
 			return await ctx.send(f"{ctx.author.mention}, 판매 등록 실패.") 			
 
 		return await ctx.send(f"**[ 순번 : {input_sell_price_data[0]} ]**   💰판매금 **[ {input_sell_price_data[1]} ]** 등록 완료! 분배를 시작합니다.")
+
+	################ 판매 취소 ################ 
+	@commands.command(name=commandSetting[51][0], aliases=commandSetting[51][1:])
+	async def cancel_sell_data(self, ctx, *, args : str = None):
+		if ctx.message.channel.id != int(basicSetting[6]) or basicSetting[6] == "":
+			return
+
+		member_data : dict = self.member_db.find_one({"_id":ctx.author.id})
+
+		if not member_data:
+			return await ctx.send(f"{ctx.author.mention}님은 혈원으로 등록되어 있지 않습니다!")
+
+		if not args:
+			return await ctx.send(f"**{commandSetting[51][0]} [순번]** 양식으로 정산 해주세요")
+
+		input_distribute_finish_data = args.split()
+		len_input_distribute_finish_data = len(input_distribute_finish_data)
+
+		if len_input_distribute_finish_data != 1:
+			return await ctx.send(f"**{commandSetting[51][0]} [순번]** 양식으로 정산 해주세요")
+
+		try:
+			input_distribute_finish_data[0] = int(input_distribute_finish_data[0])
+		except ValueError:
+			return await ctx.send(f"**[순번]**은 숫자로 입력 해주세요")
+
+		jungsan_data : dict = self.jungsan_db.find_one({"$and" : [{"$or" : [{"toggle_ID" : str(ctx.author.id)}, {"regist_ID" : str(ctx.author.id)}]}, {"_id":int(input_distribute_finish_data[0])}, {"itemstatus":"분배중"}, {"after_jungsan_ID":[]}]})
+
+		if not jungsan_data:
+			return await ctx.send(f"{ctx.author.mention}님! 등록하신 정산 내역이 **[ 분배중 ]**이 아니거나 **[정산]**처리된 인원이 있거나 정산 목록에 없습니다. **[ {commandSetting[13][0]} ]** 명령을 통해 확인해주세요")
+
+		embed = discord.Embed(
+				title = "📜 판매취소 정보",
+				description = "",
+				color=0x00ff00
+				)
+		embed.add_field(name = "[ 순번 ]", value = f"```{jungsan_data['_id']}```", inline = False)
+		embed.add_field(name = "[ 등록 ]", value = f"```{jungsan_data['regist']}```")
+		embed.add_field(name = "[ 일시 ]", value = f"```{jungsan_data['getdate'].strftime('%y-%m-%d %H:%M:%S')}```", inline = False)
+		embed.add_field(name = "[ 보스 ]", value = f"```{jungsan_data['boss']}```")
+		embed.add_field(name = "[ 아이템 ]", value = f"```{jungsan_data['item']}```")
+		embed.add_field(name = "[ 루팅 ]", value = f"```{jungsan_data['toggle']}```")
+		embed.add_field(name = "[ 상태 ]", value = f"```{jungsan_data['itemstatus']}```")
+		embed.add_field(name = "[ 판매금 ]", value = f"```{jungsan_data['price']}```")
+		embed.add_field(name = "[ 참여자 ]", value = f"```{', '.join(jungsan_data['before_jungsan_ID'])}```")
+		if jungsan_data["image_url"] != "":
+			embed.set_image(url = jungsan_data["image_url"])
+		await ctx.send(embed = embed)
+
+		data_regist_warning_message = await ctx.send(f"**판매취소하실 등록 내역을 확인해 보세요!**\n**판매취소 : ⭕ 취소: ❌**\n({basicSetting[5]}초 동안 입력이 없을시 판매취소가 취소됩니다.)", tts=False)
+
+		emoji_list : list = ["⭕", "❌"]
+		for emoji in emoji_list:
+			await data_regist_warning_message.add_reaction(emoji)
+
+		def reaction_check(reaction, user):
+			return (reaction.message.id == data_regist_warning_message.id) and (user.id == ctx.author.id) and (str(reaction) in emoji_list)
+
+		try:
+			reaction, user = await self.bot.wait_for('reaction_add', check = reaction_check, timeout = int(basicSetting[5]))
+		except asyncio.TimeoutError:
+			for emoji in emoji_list:
+				await data_regist_warning_message.remove_reaction(emoji, self.bot.user)
+			return await ctx.send(f"시간이 초과됐습니다. **판매취소**를 취소합니다!")
+
+		if str(reaction) == "⭕":
+			result = self.jungsan_db.update_one({"_id":input_distribute_finish_data[0]}, {"$set":{"price":0, "each_price":0, "itemstatus":"미판매"}}, upsert = False)
+			if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
+				return await ctx.send(f"{ctx.author.mention}, 판매 취소 실패.") 
+
+			return await ctx.send(f"📥 **[ 순번 : {input_distribute_finish_data[0]} ]** 판매취소 완료! 📥")
+		else:
+			return await ctx.send(f"**판매취소**가 취소되었습니다.\n")
 
 	################ 정산 처리 입력 ################ 
 	@commands.command(name=commandSetting[25][0], aliases=commandSetting[25][1:])
