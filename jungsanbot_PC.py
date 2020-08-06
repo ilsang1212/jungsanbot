@@ -1017,21 +1017,26 @@ class memberCog(commands.Cog):
 		
 		if len_jungsan_document != 0:
 			for jungsan_data in jungsan_document:
+				tmp_before_data = jungsan_data["before_jungsan_ID"]
+				tmp_after_data = jungsan_data["after_jungsan_ID"]
+				tmp_toggle_data = jungsan_data["toggle"]
+				tmp_regist_data = jungsan_data["regist"]
+				
 				if member_data['game_ID'] in jungsan_data["before_jungsan_ID"]:
 					jungsan_data["before_jungsan_ID"].remove(member_data['game_ID'])
 					jungsan_data["before_jungsan_ID"].append(args)
 					tmp_before_data = jungsan_data["before_jungsan_ID"]
-					result = self.jungsan_db.update_one({"_id":jungsan_data['_id']}, {"$set":{"before_jungsan_ID":jungsan_data["before_jungsan_ID"]}}, upsert = False)
+					#result = self.jungsan_db.update_one({"_id":jungsan_data['_id']}, {"$set":{"before_jungsan_ID":jungsan_data["before_jungsan_ID"]}}, upsert = False)
 				
 				if member_data['game_ID'] in jungsan_data["after_jungsan_ID"]:
 					jungsan_data["after_jungsan_ID"].remove(member_data['game_ID'])
 					jungsan_data["after_jungsan_ID"].append(args)
 					tmp_after_data = jungsan_data["after_jungsan_ID"]
-					result = self.jungsan_db.update_one({"_id":jungsan_data['_id']}, {"$set":{"after_jungsan_ID":jungsan_data["after_jungsan_ID"]}}, upsert = False)
+					#result = self.jungsan_db.update_one({"_id":jungsan_data['_id']}, {"$set":{"after_jungsan_ID":jungsan_data["after_jungsan_ID"]}}, upsert = False)
 				
 				if member_data['game_ID'] in jungsan_data["toggle"]:
 					tmp_toggle_data = args
-					result = self.jungsan_db.update_one({"_id":jungsan_data['_id']}, {"$set":{"toggle":args}}, upsert = False)
+					#result = self.jungsan_db.update_one({"_id":jungsan_data['_id']}, {"$set":{"toggle":args}}, upsert = False)
 
 				if member_data['game_ID'] in jungsan_data["regist"]:
 					tmp_regist_data = args
