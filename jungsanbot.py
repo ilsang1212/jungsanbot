@@ -171,8 +171,10 @@ class IlsangDistributionBot(commands.AutoShardedBot):
 			"username" : basicSetting[2],
 			"password" : basicSetting[3]
 			}
+			
+		INTENTS = discord.Intents.all()
 
-		super().__init__(command_prefix=[""], help_command=None)
+		super().__init__(command_prefix=[""], help_command=None, intents=INTENTS)
 		self.session = aiohttp.ClientSession(loop=self.loop)
 
 		# db 설정
@@ -1107,40 +1109,41 @@ class memberCog(commands.Cog):
 		
 		if len_jungsan_document != 0:
 			remain_jungsan_info : str = ""
+			plus_remain_money : int = 0
+			minus_remain_money : int = 0
 			total_remain_money : int = 0
 			for jungsan_data in jungsan_document:
+				tmp_str : str = f"[순번:{jungsan_data['_id']}]({jungsan_data['itemstatus']}) "
 				if jungsan_data["regist"] == args:
-					if jungsan_data['each_price'] != 0 and args in jungsan_data['before_jungsan_ID']:
-						total_remain_money += jungsan_data['each_price']
-						remain_jungsan_info += f"**[ 순번 : {jungsan_data['_id']}]** 등록  💰 {jungsan_data['each_price']}\n"
+					tmp_str += f"[등록] "
+				if jungsan_data["toggle"] == args:
+					tmp_str += f"[루팅] "
+					if jungsan_data['price'] != 0:
+						minus_remain_money += jungsan_data['price']
+						tmp_str += f"<-{jungsan_data['price']}> "
+				if args in jungsan_data["before_jungsan_ID"]:
+					if jungsan_data["itemstatus"] == "분배중":
+						plus_remain_money += jungsan_data["each_price"]
+						tmp_str += f"[참여]|{jungsan_data['price']}/{len(jungsan_data['before_jungsan_ID'])}| < +{jungsan_data['each_price']} >"
 					else:
-						remain_jungsan_info += f"**[ 순번 : {jungsan_data['_id']}]** 등록\n"
-				elif jungsan_data["toggle"] == args:
-					if jungsan_data['each_price'] != 0 and args in jungsan_data['before_jungsan_ID']:
-						total_remain_money += jungsan_data['each_price']
-						remain_jungsan_info += f"**[ 순번 : {jungsan_data['_id']}]** 루팅  💰 {jungsan_data['each_price']}\n"
-					else:
-						remain_jungsan_info += f"**[ 순번 : {jungsan_data['_id']}]** 루팅\n"
-				else: 
-					if jungsan_data['each_price'] != 0:
-						total_remain_money += jungsan_data['each_price']
-						remain_jungsan_info += f"**[ 순번 : {jungsan_data['_id']}]** 참여 💰 {jungsan_data['each_price']}\n"
-					else:
-						remain_jungsan_info += f"**[ 순번 : {jungsan_data['_id']}]** 참여\n"
+						tmp_str += f"[참여]"
+
+				remain_jungsan_info += f"{tmp_str}\n"
 						
+			total_remain_money = plus_remain_money - minus_remain_money
 
 			await ctx.send(f"```잔여 등록/루팅/정산 목록이 있어 혈원을 삭제할 수 없습니다.```")
 			embed = discord.Embed(
 				title = "📜 잔여 등록/루팅/정산 목록",
-				description = remain_jungsan_info,
+				description = f"```md\n{remain_jungsan_info}```",
 				color=0x00ff00
 				)
-			embed.add_field(name = "\u200b", value = f"잔여 정산 금액 : 💰 {total_remain_money}")
-			embed.add_field(name = "\u200b", value = f"잔여 목록을 `일괄정산`하고 혈원[`{args}`]을(를) `삭제` 하고 싶으면 🛸를 `클릭`해 주세요!", inline = False)
+			embed.add_field(name = "\u200b", value = f"잔여 정산 금액 : 💰 **{total_remain_money}**")
+			embed.add_field(name = "\u200b", value = f"잔여 목록을 `일괄정산`하고 혈원[`{args}`]을(를) `삭제` 하고 싶으면 `{int(basicSetting[5])*2}초`내로 ✅를 `클릭`해 주세요!", inline = False)
 			embed.set_footer(text = f"일괄정산 처리를 원하지 않는 경우 등록내역 수정 등을 통해 혈원[{args}]에 대한 정보를 삭제 후 다시 삭제요청 바랍니다.")
 			remain_jungsan_info_msg = await ctx.send(embed = embed)
 
-			emoji_list : list = ["🛸", "❌"]
+			emoji_list : list = ["✅", "❌"]
 
 			for emoji in emoji_list:
 				await remain_jungsan_info_msg.add_reaction(emoji)
@@ -1149,13 +1152,13 @@ class memberCog(commands.Cog):
 				return (reaction.message.id == remain_jungsan_info_msg.id) and (user.id == ctx.author.id) and (str(reaction) in emoji_list)
 
 			try:
-				reaction, user = await self.bot.wait_for('reaction_add', check = reaction_check, timeout = int(basicSetting[5]))
+				reaction, user = await self.bot.wait_for('reaction_add', check = reaction_check, timeout = int(basicSetting[5])*2)
 			except asyncio.TimeoutError:
 				for emoji in emoji_list:
 					await remain_jungsan_info_msg.remove_reaction(emoji, self.bot.user)
 				return await ctx.send(f"시간이 초과됐습니다. **혈원삭제**를 취소합니다!")
 
-			if str(reaction) == "🛸":
+			if str(reaction) == "✅":
 				for jungsan_data in jungsan_document:
 					result = self.jungsan_db.update_one({"_id":jungsan_data['_id']}, {"$set":{"before_jungsan_ID":[], "after_jungsan_ID":jungsan_data['after_jungsan_ID']+jungsan_data['before_jungsan_ID'], "modifydate":datetime.datetime.now(), "itemstatus":"분배완료"}}, upsert = True)
 					if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
