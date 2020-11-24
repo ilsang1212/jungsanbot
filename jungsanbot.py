@@ -1138,7 +1138,7 @@ class memberCog(commands.Cog):
 				description = f"```md\n{remain_jungsan_info}```",
 				color=0x00ff00
 				)
-			embed.add_field(name = "\u200b", value = f"잔여 정산 금액 : 💰 **{total_remain_money}**")
+			embed.add_field(name = "\u200b", value = f"은행 잔고 : 💰 **{member_data['account']}**\n정산 금액 : 💰 **{total_remain_money}**")
 			embed.add_field(name = "\u200b", value = f"잔여 목록을 `일괄정산`하고 혈원[`{args}`]을(를) `삭제` 하고 싶으면 `{int(basicSetting[5])*2}초`내로 ✅를 `클릭`해 주세요!", inline = False)
 			embed.set_footer(text = f"일괄정산 처리를 원하지 않는 경우 등록내역 수정 등을 통해 혈원[{args}]에 대한 정보를 삭제 후 다시 삭제요청 바랍니다.")
 			remain_jungsan_info_msg = await ctx.send(embed = embed)
@@ -2187,7 +2187,7 @@ class manageCog(commands.Cog):
 					detail_info = f"~~```fix\n[ 혈비적립 ]```~~"
 			elif jungsan_data['bank_money_insert']:
 				detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | 은행저축"
-				detail_info = f"```fix\n[ 은행저축 ]```"
+				detail_info = f"~~```fix\n[ 은행저축 ]```~~"
 			else:			
 				if jungsan_data['itemstatus'] == "분배중":
 					detail_title_info = f"[ 순번 : {jungsan_data['_id']} ] | {jungsan_data['getdate'].strftime('%y-%m-%d')} | {jungsan_data['boss']} | {jungsan_data['item']} | {jungsan_data['toggle']} | {jungsan_data['itemstatus']} : 1인당 💰{jungsan_data['each_price']}"
