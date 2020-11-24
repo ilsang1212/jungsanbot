@@ -175,7 +175,6 @@ class IlsangDistributionBot(commands.AutoShardedBot):
 		INTENTS = discord.Intents.all()
 
 		super().__init__(command_prefix=[""], help_command=None, intents=INTENTS)
-		self.session = aiohttp.ClientSession(loop=self.loop)
 
 		# db 설정
 		self.db = None
@@ -309,7 +308,6 @@ class IlsangDistributionBot(commands.AutoShardedBot):
 		raise error
 
 	async def close(self):
-		await self.session.close()
 		await super().close()
 		print("일상분배봇 종료 완료.")
 
