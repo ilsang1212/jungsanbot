@@ -631,7 +631,7 @@ class adminCog(commands.Cog):
 			member_command_list += f"{','.join(commandSetting[26])} [순번] [아이디]\n"   # 정산취소
 			member_command_list += f"{','.join(commandSetting[27])}\n"   # 일괄정산1
 			member_command_list += f"{','.join(commandSetting[27])} (검색조건) (검색값)\n"   # 일괄정산2
-			member_command_list += f"{','.join(commandSetting[58])} (검색조건) (검색값)\n"   # 부분정산
+			member_command_list += f"{','.join(commandSetting[57])} (검색조건) (검색값)\n"   # 부분정산
 
 			etc_command_list : str = ""
 			etc_command_list += f"{','.join(commandSetting[46])}\n"   # 기본설정확인
@@ -4495,7 +4495,7 @@ class bankCog(commands.Cog):
 		len_input_bank_withdraw_data : int = len(input_bank_withdraw_data)
 
 		if len_input_bank_withdraw_data < 2:
-			return await ctx.send(f"**{commandSetting[60][0]} [금액] [아이디]** 양식으로 입력 해주세요")
+			return await ctx.send(f"**{commandSetting[58][0]} [금액] [아이디]** 양식으로 입력 해주세요")
 		
 		try:
 			input_bank_withdraw_data[0] = int(input_bank_withdraw_data[0])
