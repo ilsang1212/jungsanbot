@@ -604,7 +604,7 @@ class adminCog(commands.Cog):
 			member_command_list += f"{','.join(commandSetting[11])}\n\n"   # 정산확인
 			
 			member_command_list += f"{','.join(commandSetting[12])} [보스명] [아이템] [루팅자] [아이디1] [아이디2] ... (참고이미지 url)\n"   # 등록
-			member_command_list += f"{','.join(commandSetting[12])} [보스명] [아이템1] [아이템2] [아이템3] *[루팅자] [아이디1] [아이디2] ... (참고이미지 url)\n※ 루팅자 앞에 `*`을 넣어서 아이템 여러개 동시 등록 가능"   # 멀티등록
+			member_command_list += f"{','.join(commandSetting[12])} [보스명] [아이템1] [아이템2] [아이템3] *[루팅자] [아이디1] [아이디2] ... (참고이미지 url)\n※ 루팅자 앞에 [*]을 넣어서 아이템 여러개 동시 등록 가능"   # 멀티등록
 			member_command_list += f"{','.join(commandSetting[52])} [보스명] [아이템] [루팅자] [뽑을인원] [아이디1] [아이디2] ... (참고이미지 url)\n\n"   # 뽑기등록
 			member_command_list += f"----- 등록자만 가능 -----\n"   # 등록자
 			member_command_list += f"{','.join(commandSetting[13])} (상세)\n"   # 등록확인1
