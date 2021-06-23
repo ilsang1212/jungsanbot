@@ -602,7 +602,7 @@ class adminCog(commands.Cog):
 			member_command_list += f"{','.join(commandSetting[58])} [금액] [대상아이디]\n"   # 이체
 			member_command_list += f"{','.join(commandSetting[44])} (아이템명)\n"   # 창고
 			member_command_list += f"{','.join(commandSetting[11])} (아이디)\n"   # 정산확인
-						member_command_list += f"{','.join(commandSetting[11])} (검색조건) (검색값)\n\n"   # 정산확인
+			member_command_list += f"{','.join(commandSetting[11])} (검색조건) (검색값)\n\n"   # 정산확인
 			
 			member_command_list += f"{','.join(commandSetting[12])} [보스명] [아이템] [루팅자] [아이디1] [아이디2] ... (참고이미지 url)\n"   # 등록
 			member_command_list += f"{','.join(commandSetting[12])} [보스명] [아이템1] [아이템2] [아이템3] *[루팅자] [아이디1] [아이디2] ... (참고이미지 url)\n※ 루팅자 앞에 [*]을 넣어서 아이템 여러개 동시 등록 가능\n"   # 멀티등록
